@@ -10,6 +10,8 @@ import java.io.Serializable;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 
+import logger.Logger;
+
 /**
  * We give you this class to help you display images.
  * You are free to use it or not, to modify it.
@@ -56,6 +58,7 @@ public class ImagePanel extends JPanel implements Serializable
 		{
 			image = ImageIO.read(file);
 			fileName = file.getPath();
+			Logger.debug("new image : " + fileName);
 		} catch (IOException e)
 		{
 			e.printStackTrace();
@@ -114,7 +117,7 @@ public class ImagePanel extends JPanel implements Serializable
 	{
 		super.paintComponent(g);
 		//TODO : dynamically resize image
-		g.drawImage(image, 0, 0, 800, 600, null);
+		g.drawImage(image, 0, 0, null);
 	}
 
 	public String getFileName()

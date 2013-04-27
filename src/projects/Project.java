@@ -2,6 +2,7 @@ package projects;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -12,7 +13,10 @@ import javax.swing.BoxLayout;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.ScrollPaneLayout;
 
 import logger.Logger;
 
@@ -40,21 +44,32 @@ public class Project implements Serializable{
 	
 	/**
 	 * Add an image to the current prindexoject
+	 * We use a Jpanel with a GridBagLayout to center the image.
+	 * A JScrollPan to a scrollbars.
 	 * TODO : get the right fileName
 	 * @param path
 	 */
-	public JPanel addImage(File path)
+	public JScrollPane addImage(File path)
 	{
 		Logger.debug("Adding image");
-		JPanel imagePanel = new JPanel();
-		imagePanel.setLayout(new BoxLayout(imagePanel, 0));
-		imagePanel.setPreferredSize(new Dimension(500, 500));
-
+		
 		ImagePanel newImage = new ImagePanel(path);
-		newImage.size(newImage.getWidth(), newImage.getHeight());
+		newImage.setName(path.getName());
+		newImage.setPreferredSize(new Dimension(newImage.getWidth(),
+				newImage.getHeight()));
+		newImage.setMinimumSize(new Dimension(newImage.getWidth(),
+				newImage.getHeight()));
 		imageList.add(newImage);
-		imagePanel.add(newImage);
-		return imagePanel;
+		
+		ImageViewer viewer = new ImageViewer(newImage);
+		
+		JScrollPane scroller = new JScrollPane(viewer);
+		scroller.setLayout(new ScrollPaneLayout());
+		scroller.setVerticalScrollBarPolicy(ScrollPaneConstants.
+				VERTICAL_SCROLLBAR_AS_NEEDED);
+		scroller.setHorizontalScrollBarPolicy(ScrollPaneConstants.
+				HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		return scroller;
 	}
 
 	/**

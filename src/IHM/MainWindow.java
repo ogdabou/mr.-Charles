@@ -71,7 +71,7 @@ public class MainWindow extends JFrame implements ActionListener, MenuListener{
 		
 		this.setJMenuBar(menuBarInit());
 		jarLoader = new JarLoader(bonus, mandatory, this);
-		//jarLoader.load();
+		jarLoader.load();
 		
 
 		this.setVisible(true);

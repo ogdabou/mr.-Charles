@@ -13,6 +13,7 @@ import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -20,6 +21,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import logger.Logger;
 
 import plugin.IPlugin;
+import projects.ImageViewer;
 import projects.Project;
 
 /**
@@ -95,14 +97,15 @@ public class PrimaryPanel extends JPanel implements ActionListener{
 		else
 		{
 			int index = projectPane.getSelectedIndex();
-			JPanel added = projectList.get(index).addImage(file);
+			JScrollPane added = projectList.get(index).addImage(file);
 
 			JTabbedPane pane =  (JTabbedPane)projectPane.getComponentAt(index);
 			if (projectList.get(index).getListSize() <= 1)
 			{
 				pane.remove(0);
 			}
-			pane.add(projectList.get(index).getImageFormatedName(index), added);
+			pane.add(projectList.get(index).getImageFormatedName(projectList.
+					get(index).getListSize() - 1), added);
 
 		}
 	}
@@ -117,13 +120,15 @@ public class PrimaryPanel extends JPanel implements ActionListener{
 		JTabbedPane pane = (JTabbedPane)projectPane.getComponentAt(index);
 		Project currentP = projectList.get(index);
 		ImagePanel image = currentP.getImage(pane.getSelectedIndex());
-		JPanel panel = (JPanel)pane.getComponent(pane.getSelectedIndex());
+		Logger.debug("Applying " + filter.getName() + " on " + image.getName());
+		JScrollPane panel = (JScrollPane)pane.getComponent(pane.getSelectedIndex());
 		pane.remove(panel);
 		panel.remove(image);
+		ImageViewer viewer = new ImageViewer(image);
 		BufferedImage result = filter.perform(image.image);
 		image.setImage(result);
-		panel.add(image);
-		pane.add(panel);
+		panel = new JScrollPane(viewer);
+		pane.add(image.getName(), panel);
 	}
 
 	@Override
