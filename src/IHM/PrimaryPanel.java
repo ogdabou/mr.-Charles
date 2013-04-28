@@ -61,8 +61,6 @@ public class PrimaryPanel extends JPanel implements ActionListener{
 	{
 		this.setLayout(mainLayout);
 		projectPane = new JTabbedPane();
-		//TODO supress following line
-		//addProject("Untitled-" + nbProjects);
 		this.add(projectPane);
 	}
 	
@@ -167,40 +165,46 @@ public class PrimaryPanel extends JPanel implements ActionListener{
 		return projectList.size();
 	}
 	
+	public ArrayList<Project> getProjectList() {
+		return projectList;
+	}
+
+	public void setProjectList(ArrayList<Project> projectList) {
+		this.projectList = projectList;
+	}
+
+	public JTabbedPane getProjectPane() {
+		return projectPane;
+	}
+
+	public void setProjectPane(JTabbedPane projectPane) {
+		this.projectPane = projectPane;
+	}
+
 	/**
 	 * Apply the given filter to the current image.
 	 * @param filter
 	 */
 	public void applyFilter(IPlugin filter)
 	{
-		int index = projectPane.getSelectedIndex();
-		JTabbedPane pane = (JTabbedPane)projectPane.getComponentAt(index);
-		Project currentP = projectList.get(index);
-		ImagePanel image = currentP.getImage(pane.getSelectedIndex());
-		Logger.debug("Applying " + filter.getName() + " on " + image.getName());
-		JScrollPane panel = (JScrollPane)pane.getComponent(pane.getSelectedIndex());
-		pane.remove(panel);
-		panel.remove(image);
-		ImageViewer viewer = new ImageViewer(image);
-		
-		
-		FilterThread computer = new FilterThread(image.image, filter, progressPane);
-		BufferedImage result = null;
+		FilterThread computer = new FilterThread(filter, this);
+		progressPane.addProgress(filter.getName());
+		this.revalidate();
 		try {
-			result = computer.doInBackground();
+			computer.execute();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		//BufferedImage result = filter.perform(image.image);
-		
-		image.setImage(result);
-		panel = new JScrollPane(viewer);
-		pane.add(image.getName(), panel);
 	}
 
 	public void setProgressPane(ProgressPane pane)
 	{
 		progressPane = pane;
+	}
+	
+	public ProgressPane getProgressPane()
+	{
+		return progressPane;
 	}
 	
 	@Override
@@ -221,21 +225,42 @@ public class PrimaryPanel extends JPanel implements ActionListener{
 		
 	}
 }
-
+/**
+ * Used to thread our Filters!
+ * We have to update a JScrollPane,
+ * to use this we use the
+ * getViewPort().add() because the .add method doesnt work.
+ * @author ogda
+ *
+ */
 class FilterThread extends SwingWorker
 {
-	private BufferedImage image;
 	private IPlugin filter;
+	private PrimaryPanel parent;
 	
-	public FilterThread(BufferedImage image, IPlugin filter) {
-		this.image = image;
+	public FilterThread(IPlugin filter, PrimaryPanel primary) {
+		parent = primary;
+		
 		this.filter = filter;
 	}
-	
 
 	@Override
-	protected BufferedImage doInBackground() throws Exception {
-		return filter.perform(image);
+	protected Object doInBackground() throws Exception {
+		int index = parent.getProjectPane().getSelectedIndex();
+		JTabbedPane pane = (JTabbedPane)parent.getProjectPane().getComponentAt(index);
+		Project currentP = parent.getProjectList().get(index);
+		ImagePanel image = currentP.getImage(pane.getSelectedIndex());
+
+		Logger.debug("Applying " + filter.getName() + " on " + image.getName());
+
+		JScrollPane panel = (JScrollPane)pane.getComponent(pane.getSelectedIndex());
+		ImageViewer viewer = new ImageViewer(image);
+
+		BufferedImage result = filter.perform(image.image);
+		image.setImage(result);
+		panel.getViewport().add(viewer);
+		parent.getProgressPane().removeProgress(filter.getName());
+		return null;
 	}
 	
 }

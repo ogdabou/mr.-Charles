@@ -151,7 +151,6 @@ public class MainWindow extends JFrame implements ActionListener{
 				{
 					Logger.debug("Pluggin " + current.getName() + " selected");
 					panel.applyFilter(plugins.get(index));
-					//apply plugin
 				}
 				index += 1;
 			}

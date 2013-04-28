@@ -24,14 +24,4 @@ public class ProgressBarPanel extends JPanel{
 		this.add(progressTitleLabel);
 		this.add(progressBar);
 	}
-	
-	public void testCompletion()
-	{
-		int cpt = 0;
-		while(cpt < 100000)
-		{
-			cpt ++;
-			progressBar.setValue(cpt);
-		}
-	}
 }
