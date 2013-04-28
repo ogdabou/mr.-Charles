@@ -1,0 +1,36 @@
+TODO		couty_a
+
+[-] Mandatory
+	[-] Projects
+		[-] Save
+		[-] Load
+		[x] CreateNew
+		[x] CreateNew when opening image without projects
+		[x] Add Image
+	[-] Plugins
+		[x] JarLoader
+		[x] Apply
+		[-] Thread
+		[-] Stopping Thread
+		[-] Invert Colors
+		[-] GreyScale
+		[-] Binary
+		[-] Rotate Left
+		[-] Rotate right
+		[-] Flip horizontal
+		[-] Flip Vertical
+	[-] History
+		[-] One hystory per image file
+		[-] Memento deign pattern
+		
+[x] Bonus Done
+	[x] Multi project handling
+	[x] Multi files per project
+	[x] Hotkeys
+	[x] Scrolling Area	
+	
+[-] Ideas
+	[-] Batch processing
+	[-] Script creation
+	[-] Algorithm compare
+	[-] Filters algorithm

@@ -1,26 +1,21 @@
 package projects;
 
-import java.awt.BorderLayout;
+
 import java.awt.Dimension;
-import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import javax.swing.BoxLayout;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
+
 import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.ScrollPaneLayout;
 
 import logger.Logger;
 
 import IHM.ImagePanel;
+import IHM.ImageViewer;
 
 public class Project implements Serializable{
 
@@ -29,6 +24,7 @@ public class Project implements Serializable{
 	
 	private String name;
 	private ArrayList<ImagePanel> imageList;
+	private String lastDirectory;
 	
 	/**
 	 * 
@@ -38,6 +34,7 @@ public class Project implements Serializable{
 	 */
 	public Project(String name)
 	{
+		lastDirectory = "";
 		this.name = name;
 		imageList = new ArrayList<ImagePanel>();
 	}
@@ -46,6 +43,8 @@ public class Project implements Serializable{
 	 * Add an image to the current prindexoject
 	 * We use a Jpanel with a GridBagLayout to center the image.
 	 * A JScrollPan to a scrollbars.
+	 * We fixe the image ize in order to make the scroll panel
+	 * to correctly center the image.
 	 * TODO : get the right fileName
 	 * @param path
 	 */
@@ -60,7 +59,6 @@ public class Project implements Serializable{
 		newImage.setMinimumSize(new Dimension(newImage.getWidth(),
 				newImage.getHeight()));
 		imageList.add(newImage);
-		
 		ImageViewer viewer = new ImageViewer(newImage);
 		
 		JScrollPane scroller = new JScrollPane(viewer);
@@ -89,6 +87,23 @@ public class Project implements Serializable{
 	public int getListSize()
 	{
 		return imageList.size();
+	}
+	
+	public void setDirectory(String path)
+	{
+		String result = path;
+		int index = result.lastIndexOf("/");
+		result = result.substring(0, index);
+		if (!result.equals(lastDirectory))
+		{
+			Logger.debug("Working directory is now: " + result);
+			lastDirectory = result;
+		}
+	}
+	
+	public String getDirectory()
+	{
+		return lastDirectory;
 	}
 	
 	public String getImageFormatedName(int index)

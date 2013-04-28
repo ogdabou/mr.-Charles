@@ -3,6 +3,7 @@ package IHM;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -21,7 +22,7 @@ import sun.tools.jar.resources.jar;
 
 import logger.Logger;
 
-public class MainWindow extends JFrame implements ActionListener, MenuListener{
+public class MainWindow extends JFrame implements ActionListener{
 
 	private static final long serialVersionUID = 1L;
 	private Container pan;
@@ -30,10 +31,7 @@ public class MainWindow extends JFrame implements ActionListener, MenuListener{
 	private JMenuBar menuBar;
 	
 	private JMenu file;
-	private JMenu createNew;
 	private JMenuItem project;
-	private JMenuItem image;
-	private JMenu open;
 	private JMenuItem openProject;
 	private JMenuItem openFile;
 	private JMenuItem exit;
@@ -47,6 +45,7 @@ public class MainWindow extends JFrame implements ActionListener, MenuListener{
 	private ToolBar toolBar;
 	private NewProjectWindow projectWindow;
 	private JarLoader jarLoader;
+	private ProgressPane progressPane;
 	/**
 	 * Constructor
 	 */
@@ -60,10 +59,20 @@ public class MainWindow extends JFrame implements ActionListener, MenuListener{
 		this.setMaximumSize(new Dimension(900,700));
 		footer = new FooterBar();
 		right = new RightPanel();
+		progressPane = right.getProgressPanel();
 		toolBar = new ToolBar();
 		panel = new PrimaryPanel();
 		panel.init();
+		panel.setProgressPane(progressPane);
+		
+		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+		this.setPreferredSize(screen);
+		this.setMinimumSize(screen);
 
+		JPanel lol = new JPanel();
+		lol.setPreferredSize(new Dimension(102, 10));
+		this.add(lol, BorderLayout.NORTH);
+		
 		this.add(panel, BorderLayout.CENTER);
 		this.add(footer, BorderLayout.SOUTH);
 		this.add(right, BorderLayout.EAST);
@@ -73,7 +82,7 @@ public class MainWindow extends JFrame implements ActionListener, MenuListener{
 		jarLoader = new JarLoader(bonus, mandatory, this);
 		jarLoader.load();
 		
-
+		this.setResizable(false);
 		this.setVisible(true);
 	}
 
@@ -84,45 +93,53 @@ public class MainWindow extends JFrame implements ActionListener, MenuListener{
 	public void actionPerformed(ActionEvent a) {
 		Logger.debug("Action on: " + a.getActionCommand());
 		String name = (String)a.getActionCommand();
-		JFileChooser projectFinder = new JFileChooser();
-
-		if (name.contains("Existing "))
+		JFileChooser projectFinder = null;
+		if (panel.getListSize() != 0 && !panel.getCurrentProject().getDirectory().equals(""))
 		{
-			if (name.equals("Existing project"))
-			{
-				//TODO the current searching directory should be saved AND serialized
-				Logger.debug("Project opening requested.");
-				FileFilter filter = new FileNameExtensionFilter("*.myPSD", "myPSD");
-				projectFinder.setFileFilter(filter);
-				projectFinder.showOpenDialog(this);
-			}
-			else if (name.equals("Existing file"))
-			{
-				//TODO the current searching directory should be saved AND serialized
-				Logger.debug("Project opening requested.");
-				FileFilter filter = new FileNameExtensionFilter("Image formats (*.jpg, *.jpeg, *.gif, *.ico, *.bmp)",
-						"jpeg", "gif", "ico", "bmp", "jpg");
-				projectFinder.setFileFilter(filter);
-				projectFinder.showOpenDialog(this);
-				File choosen = projectFinder.getSelectedFile();
-				if(choosen != null)
-				{
-					panel.addImage(choosen);
-				}
-			}
-			File choosen = projectFinder.getSelectedFile();
+			projectFinder = new JFileChooser(new File(panel.getCurrentProject().getDirectory()));
 		}
-		else if (name.equals("Project"))
+		else
+			projectFinder = new JFileChooser();
+		if (name.equals("Open project"))
+		{
+			//TODO the current searching directory should be saved AND serialized
+			Logger.debug("Project opening requested.");
+			projectFinder.setName("Open existing project");
+			FileFilter filter = new FileNameExtensionFilter("*.myPSD", "myPSD");
+			projectFinder.setFileFilter(filter);
+			projectFinder.showOpenDialog(this);
+		}
+		else if (name.equals("Open file"))
+		{
+			Logger.debug("File opening requested.");
+			FileFilter filter = new FileNameExtensionFilter("Image formats (*.jpg, *.jpeg, *.gif, *.ico, *.bmp)",
+					"jpeg", "gif", "ico", "bmp", "jpg");
+			projectFinder.setFileFilter(filter);
+			projectFinder.setName("Add file to the current project");
+			projectFinder.showOpenDialog(this);
+			File choosen = projectFinder.getSelectedFile();
+			if(choosen != null)
+			{
+				panel.addImage(choosen);
+				if (panel.getListSize() != 0)
+					panel.getCurrentProject().setDirectory(choosen.getPath());
+			}
+		}
+		else if (name.equals("New project"))
 		{
 			Logger.debug("Creating new project");
+			projectWindow.setTitle("New Project");
 			projectWindow.setVisible(true);
-			
 		}
 		else if (name.equals("OK"))
 		{
 			Logger.debug("New project named: " + projectWindow.getProjectName());
 			panel.addProject(projectWindow.getProjectName());
 			projectWindow.setVisible(false);
+		}
+		else if (name.equals("Exit"))
+		{
+			System.exit(0);
 		}
 		else
 		{
@@ -166,28 +183,6 @@ public class MainWindow extends JFrame implements ActionListener, MenuListener{
 		plugins.add(p);
 	}
 	
-	@Override
-	public void menuCanceled(MenuEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void menuDeselected(MenuEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	/**
-	 * Called when the mouse is over the menu
-	 */
-	public void menuSelected(MenuEvent arg0) {
-		
-		//Logger.debug(arg0.getSource().toString());
-		
-	}
-	
 	
 	/**
 	 * Main window MenuBar initialization
@@ -198,28 +193,26 @@ public class MainWindow extends JFrame implements ActionListener, MenuListener{
 		menuBar = new JMenuBar();
 		file = new JMenu("File");
 		
-		createNew = new JMenu("New...");
-		project = new JMenuItem("Project");
-		createNew.addMenuListener(this);
+		project = new JMenuItem("New project");
 		project.addActionListener(this);
+		project.setAccelerator(KeyStroke.getKeyStroke("control P"));
 
-		image = new JMenuItem("File");
-		image.addActionListener(this);
-		
-		createNew.add(project);
-		createNew.add(image);
-		file.add(createNew);
+		file.add(project);
 
-		open = new JMenu("Open");
-		openProject = new JMenuItem("Existing project");
+		openProject = new JMenuItem("Open project");
+		openProject.setAccelerator(KeyStroke.getKeyStroke("control Q"));
 		openProject.addActionListener(this);
-		openFile = new JMenuItem("Existing file");
+		openFile = new JMenuItem("Open file");
 		openFile.addActionListener(this);
-		open.add(openProject);
-		open.add(openFile);
-		file.add(open);
+		openFile.setAccelerator(KeyStroke.getKeyStroke("control N"));
+
+		file.addSeparator();
+		file.add(openProject);
+		file.add(openFile);
+		file.addSeparator();
 		
 		exit = new JMenuItem("Exit");
+		exit.addActionListener(this);
 		file.add(exit);
 		
 		filters = new JMenu("Filters");

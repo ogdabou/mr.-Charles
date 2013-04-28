@@ -9,19 +9,21 @@ import java.io.File;
 import java.util.ArrayList;
 
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.SwingConstants;
+import javax.swing.SwingWorker;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
+import com.sun.org.apache.bcel.internal.generic.LASTORE;
 
 import logger.Logger;
 
 import plugin.IPlugin;
-import projects.ImageViewer;
 import projects.Project;
 
 /**
@@ -38,6 +40,7 @@ public class PrimaryPanel extends JPanel implements ActionListener{
 	private JTabbedPane projectPane;
 	private JFileChooser fileChooser;
 	private FileFilter filter;
+	private ProgressPane progressPane;
 	/**
 	 * 
 	 */
@@ -59,7 +62,7 @@ public class PrimaryPanel extends JPanel implements ActionListener{
 		this.setLayout(mainLayout);
 		projectPane = new JTabbedPane();
 		//TODO supress following line
-		addProject("Untitled-" + nbProjects);
+		//addProject("Untitled-" + nbProjects);
 		this.add(projectPane);
 	}
 	
@@ -94,20 +97,74 @@ public class PrimaryPanel extends JPanel implements ActionListener{
 		{
 			addProject("Untitled-" + nbProjects);
 		}
-		else
+
+		int index = projectPane.getSelectedIndex();
+		JScrollPane added = projectList.get(index).addImage(file);
+
+		JTabbedPane pane =  (JTabbedPane)projectPane.getComponentAt(index);
+		if (projectList.get(index).getListSize() <= 1)
 		{
-			int index = projectPane.getSelectedIndex();
-			JScrollPane added = projectList.get(index).addImage(file);
-
-			JTabbedPane pane =  (JTabbedPane)projectPane.getComponentAt(index);
-			if (projectList.get(index).getListSize() <= 1)
-			{
-				pane.remove(0);
-			}
-			pane.add(projectList.get(index).getImageFormatedName(projectList.
-					get(index).getListSize() - 1), added);
-
+			pane.remove(0);
 		}
+		pane.add(projectList.get(index).getImageFormatedName(projectList.
+				get(index).getListSize() - 1), added);
+	}
+	/**
+	 * 
+	 * @return
+	 */
+	public Project getCurrentProject()
+	{
+		return projectList.get(getCurrentProjectIndex());
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public int getCurrentProjectIndex()
+	{
+		Logger.debug("getCurrentProjectIndex = " + 
+							projectPane.getSelectedIndex());
+		return projectPane.getSelectedIndex();
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public int getCurrentImageIndex()
+	{
+		JTabbedPane pane =  (JTabbedPane)projectPane
+				.getComponentAt(getCurrentImageIndex());
+		Logger.debug("getCurrentImageIndex = " + pane.getSelectedIndex());
+		return pane.getSelectedIndex();
+	}
+	
+	/**
+	 * 
+	 */
+	public void setDirectory(String path)
+	{
+		getCurrentProject().setDirectory(path);
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public String getDirectory()
+	{
+		return getCurrentProject().getDirectory();
+	}
+	/**
+	 * Return the size of the list containing all the projects
+	 * @return
+	 */
+	public int getListSize()
+	{
+		Logger.debug("projectListSize is: " + projectList.size());
+		return projectList.size();
 	}
 	
 	/**
@@ -125,12 +182,27 @@ public class PrimaryPanel extends JPanel implements ActionListener{
 		pane.remove(panel);
 		panel.remove(image);
 		ImageViewer viewer = new ImageViewer(image);
-		BufferedImage result = filter.perform(image.image);
+		
+		
+		FilterThread computer = new FilterThread(image.image, filter, progressPane);
+		BufferedImage result = null;
+		try {
+			result = computer.doInBackground();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		//BufferedImage result = filter.perform(image.image);
+		
 		image.setImage(result);
 		panel = new JScrollPane(viewer);
 		pane.add(image.getName(), panel);
 	}
 
+	public void setProgressPane(ProgressPane pane)
+	{
+		progressPane = pane;
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 		String name = arg0.getActionCommand();
@@ -142,8 +214,28 @@ public class PrimaryPanel extends JPanel implements ActionListener{
 			{
 				Logger.debug("File " + choosen + " selected");
 				addImage(choosen);
+				if (this.getListSize() != 0)
+					this.getCurrentProject().setDirectory(choosen.getPath());
 			}
 		}
 		
 	}
+}
+
+class FilterThread extends SwingWorker
+{
+	private BufferedImage image;
+	private IPlugin filter;
+	
+	public FilterThread(BufferedImage image, IPlugin filter) {
+		this.image = image;
+		this.filter = filter;
+	}
+	
+
+	@Override
+	protected BufferedImage doInBackground() throws Exception {
+		return filter.perform(image);
+	}
+	
 }

@@ -78,7 +78,6 @@ public class ImagePanel extends JPanel implements Serializable
 				current.getHeight(null),
 				image.getType());
 		view = nImage;
-		//image = nImage;
 	}
 	
 	/**
@@ -116,7 +115,6 @@ public class ImagePanel extends JPanel implements Serializable
 	public void paintComponent(Graphics g)
 	{
 		super.paintComponent(g);
-		//TODO : dynamically resize image
 		g.drawImage(image, 0, 0, null);
 	}
 

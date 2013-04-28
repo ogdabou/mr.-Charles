@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -40,7 +42,7 @@ public class JarLoader {
 	{
 		for (File current : pluginFolder.listFiles())
 		{
-				System.out.println(current);
+				Logger.debug(current.getPath());
 	
 			try {
 				try {
