@@ -21,10 +21,12 @@ import IHM.ProgressBarPanel;
 public class ProgressPane extends JScrollPane{
 	private HashMap<String, ArrayList<ProgressBarPanel>> filterQueue;
 	private JPanel container;
+	private MainWindow mainWindow;
 
-	public ProgressPane(JPanel containerr)
+	public ProgressPane(JPanel containerr, MainWindow mainWindow)
 	{
 		super(containerr);
+		this.mainWindow = mainWindow;
 		filterQueue = new HashMap<String, ArrayList<ProgressBarPanel>>();
 		container = containerr;
 		container.setLayout(new BoxLayout(container, BoxLayout.PAGE_AXIS));
@@ -35,7 +37,7 @@ public class ProgressPane extends JScrollPane{
 	 */
 	public void addProgress(String threadName)
 	{
-		ProgressBarPanel newProgress = new ProgressBarPanel(threadName);
+		ProgressBarPanel newProgress = new ProgressBarPanel(threadName, mainWindow);
 		if (filterQueue.get(threadName) != null)
 			filterQueue.get(threadName).add(newProgress);
 		else
@@ -59,19 +61,5 @@ public class ProgressPane extends JScrollPane{
 		this.getViewport().add(container);
 		this.revalidate();
 		
-	}
-	
-	/**
-	 * 
-	 */
-	public void testScroll()
-	{
-		int cpt = 0;
-		while(cpt < 100)
-		{
-			cpt ++;
-			ProgressBarPanel test = new ProgressBarPanel("test" + cpt);
-			container.add(test);
-		}
 	}
 }

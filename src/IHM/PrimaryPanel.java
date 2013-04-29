@@ -34,6 +34,7 @@ import projects.Project;
 public class PrimaryPanel extends JPanel implements ActionListener{
 	private int nbProjects;
 	private ArrayList<Project> projectList;
+	private FilterThread computer;
 	
 	private static final long serialVersionUID = -6382602883374669443L;
 	private BorderLayout mainLayout;
@@ -41,6 +42,8 @@ public class PrimaryPanel extends JPanel implements ActionListener{
 	private JFileChooser fileChooser;
 	private FileFilter filter;
 	private ProgressPane progressPane;
+	public BufferedImage onProcessImage;
+	public int onProcessImageIndex;
 	/**
 	 * 
 	 */
@@ -113,7 +116,10 @@ public class PrimaryPanel extends JPanel implements ActionListener{
 	 */
 	public Project getCurrentProject()
 	{
-		return projectList.get(getCurrentProjectIndex());
+		if(projectList.size() >= 0)
+			return projectList.get(getCurrentProjectIndex());
+		else
+			return null;
 	}
 	
 	/**
@@ -187,26 +193,46 @@ public class PrimaryPanel extends JPanel implements ActionListener{
 	 */
 	public void applyFilter(IPlugin filter)
 	{
-		FilterThread computer = new FilterThread(filter, this);
+		computer = new FilterThread(filter, this);
 		progressPane.addProgress(filter.getName());
 		this.revalidate();
-		try {
-			computer.execute();
-		} catch (Exception e) {
-			e.printStackTrace();
+		computer.execute();
+	}
+	
+	/**
+	 * 
+	 */
+	public void stopProcess()
+	{
+		if (computer != null)
+		{
+			Logger.debug("thread canceled");
+			computer.cancel(true);
+			/*projectList.get(getCurrentProjectIndex())
+			.getImage(getCurrentImageIndex()).setImage(onProcessImage);*/
 		}
 	}
 
+	/**
+	 * 
+	 * @param pane
+	 */
 	public void setProgressPane(ProgressPane pane)
 	{
 		progressPane = pane;
 	}
-	
+	/**
+	 * 
+	 * @return
+	 */
 	public ProgressPane getProgressPane()
 	{
 		return progressPane;
 	}
 	
+	/**
+	 * 
+	 */
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 		String name = arg0.getActionCommand();
@@ -225,11 +251,52 @@ public class PrimaryPanel extends JPanel implements ActionListener{
 		
 	}
 }
+
+/**
+ * Used to thread our batched script!
+ * We have to update a JScrollPane,
+ * to use this we use the
+ * getViewPort().add() because the .add method does'nt work.
+ * @author ogda
+ *
+ */
+class BatchFilterThread extends SwingWorker
+{
+	private IPlugin filter;
+	private PrimaryPanel parent;
+	
+	public BatchFilterThread(IPlugin filter, PrimaryPanel primary) {
+		parent = primary;
+		
+		this.filter = filter;
+	}
+
+	@Override
+	protected Object doInBackground() throws Exception {
+		int index = parent.getProjectPane().getSelectedIndex();
+		JTabbedPane pane = (JTabbedPane)parent.getProjectPane()
+				.getComponentAt(index);
+		Project currentP = parent.getProjectList().get(index);
+		ImagePanel image = currentP.getImage(pane.getSelectedIndex());
+
+		Logger.debug("Applying " + filter.getName() + " on " + image.getName());
+
+		JScrollPane panel = (JScrollPane)pane.getComponent(pane.getSelectedIndex());
+		ImageViewer viewer = new ImageViewer(image);
+
+		BufferedImage result = filter.perform(image.image);
+		image.setImage(result);
+		panel.getViewport().add(viewer);
+		parent.getProgressPane().removeProgress(filter.getName());
+		return null;
+	}	
+}
+
 /**
  * Used to thread our Filters!
  * We have to update a JScrollPane,
  * to use this we use the
- * getViewPort().add() because the .add method doesnt work.
+ * getViewPort().add() because the .add method does'nt work.
  * @author ogda
  *
  */
@@ -247,9 +314,11 @@ class FilterThread extends SwingWorker
 	@Override
 	protected Object doInBackground() throws Exception {
 		int index = parent.getProjectPane().getSelectedIndex();
-		JTabbedPane pane = (JTabbedPane)parent.getProjectPane().getComponentAt(index);
+		JTabbedPane pane = (JTabbedPane)parent.getProjectPane()
+				.getComponentAt(index);
 		Project currentP = parent.getProjectList().get(index);
 		ImagePanel image = currentP.getImage(pane.getSelectedIndex());
+		parent.onProcessImage = image.image;
 
 		Logger.debug("Applying " + filter.getName() + " on " + image.getName());
 
@@ -261,6 +330,5 @@ class FilterThread extends SwingWorker
 		panel.getViewport().add(viewer);
 		parent.getProgressPane().removeProgress(filter.getName());
 		return null;
-	}
-	
+	}	
 }

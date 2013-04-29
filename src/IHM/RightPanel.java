@@ -11,13 +11,13 @@ public class RightPanel extends JPanel{
 	private JPanel progressPanel;
 	private ProgressPane progress;
 	
-	public RightPanel() {
+	public RightPanel(MainWindow mainWindow) {
 		topPane = new JTabbedPane();
 		progressPanel = new JPanel();
 		progressPanel.setBackground(Color.WHITE);
 		topPane.setPreferredSize(new Dimension(240, 300));
 		topPane.setMinimumSize(new Dimension(240, 300));
-		progress = new ProgressPane(progressPanel);
+		progress = new ProgressPane(progressPanel, mainWindow);
 		topPane.add("Filters execution", progress);
 		
 		this.add(topPane);

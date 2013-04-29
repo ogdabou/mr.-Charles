@@ -38,18 +38,21 @@ public class MainWindow extends JFrame implements ActionListener{
 	private JMenu filters;
 	private JMenu mandatory;
 	private JMenu bonus;
+	private JMenuItem batch;
 	
 	private PrimaryPanel panel;
 	private FooterBar footer;
 	private RightPanel right;
 	private ToolBar toolBar;
 	private NewProjectWindow projectWindow;
+	private BatchWindow batchWindow;
 	private JarLoader jarLoader;
 	private ProgressPane progressPane;
 	/**
 	 * Constructor
 	 */
 	public MainWindow() {
+		batchWindow = new BatchWindow();
 		plugins = new ArrayList<IPlugin>();
 		this.setTitle("myPhotoshop - couty_a");
 		this.setMinimumSize(new Dimension(1024, 700));
@@ -58,7 +61,7 @@ public class MainWindow extends JFrame implements ActionListener{
 		projectWindow.setLayout(new BorderLayout());
 		this.setMaximumSize(new Dimension(900,700));
 		footer = new FooterBar();
-		right = new RightPanel();
+		right = new RightPanel(this);
 		progressPane = right.getProgressPanel();
 		toolBar = new ToolBar();
 		panel = new PrimaryPanel();
@@ -141,6 +144,18 @@ public class MainWindow extends JFrame implements ActionListener{
 		{
 			System.exit(0);
 		}
+		else if (name.equals("X"))
+		{
+			panel.stopProcess();
+		}
+		else if (name.equals("Batch"))
+		{
+			Logger.debug("batch  " + panel.getProjectList().size());
+			if (panel.getProjectList().size() > 0)
+				batchWindow.fillImagesBoxes(panel.getCurrentProject());
+			batchWindow.fillPluginsBoxes(plugins);
+			batchWindow.setVisible(true);
+		}
 		else
 		{
 			int index = 0;
@@ -216,9 +231,13 @@ public class MainWindow extends JFrame implements ActionListener{
 		
 		filters = new JMenu("Filters");
 		mandatory = new JMenu("Mandatories");
+		batch = new JMenuItem("Batch");
+		batch.addActionListener(this);
 		bonus = new JMenu("Bonus");
 		filters.add(mandatory);
 		filters.add(bonus);
+		filters.addSeparator();
+		filters.add(batch);
 		
 		menuBar.add(file);
 		menuBar.add(filters);
