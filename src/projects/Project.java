@@ -6,14 +6,21 @@ import java.awt.Dimension;
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 
 import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.ScrollPaneLayout;
 
-import logger.Logger;
+import com.sun.org.apache.bcel.internal.generic.JsrInstruction;
 
+import logger.Logger;
+import memento.CareTaker;
+
+import IHM.HystoryScroller;
 import IHM.ImagePanel;
 import IHM.ImageViewer;
 
@@ -24,7 +31,11 @@ public class Project implements Serializable{
 	
 	private String name;
 	private ArrayList<ImagePanel> imageList;
+	private Map<JScrollPane, ImagePanel> scrollToImage;
 	private String lastDirectory;
+	private Map<ImagePanel, CareTaker> mementoList = new HashMap<ImagePanel,
+			CareTaker>();
+	private HystoryScroller historyScroller;
 	
 	/**
 	 * 
@@ -34,11 +45,16 @@ public class Project implements Serializable{
 	 */
 	public Project(String name)
 	{
+		scrollToImage = new HashMap<JScrollPane, ImagePanel>();
 		lastDirectory = "";
 		this.name = name;
 		imageList = new ArrayList<ImagePanel>();
 	}
 	
+	public void setHistoryScrolelr(HystoryScroller s)
+	{
+		this.historyScroller = s;
+	}
 	/**
 	 * Add an image to the current prindexoject
 	 * We use a Jpanel with a GridBagLayout to center the image.
@@ -46,6 +62,7 @@ public class Project implements Serializable{
 	 * We fixe the image ize in order to make the scroll panel
 	 * to correctly center the image.
 	 * TODO : get the right fileName
+	 * TODO : Be careful, same-name images will have the same Memento
 	 * @param path
 	 */
 	public JScrollPane addImage(File path)
@@ -58,18 +75,44 @@ public class Project implements Serializable{
 				newImage.getHeight()));
 		newImage.setMinimumSize(new Dimension(newImage.getWidth(),
 				newImage.getHeight()));
+
+		CareTaker careTaker = new CareTaker();
+		
 		imageList.add(newImage);
+		careTaker.originator.setCurrentState(newImage);
+		careTaker.originator
+			.saveInMemento(newImage.getName() + " loaded");
+		careTaker.states.add(careTaker.originator.
+				saveInMemento(newImage.getName() + " opened"));
+		mementoList.put(newImage, careTaker);
+		
+		historyScroller.redraw(mementoList.get(newImage));
+
 		ImageViewer viewer = new ImageViewer(newImage);
 		
 		JScrollPane scroller = new JScrollPane(viewer);
+		
 		scroller.setLayout(new ScrollPaneLayout());
 		scroller.setVerticalScrollBarPolicy(ScrollPaneConstants.
 				VERTICAL_SCROLLBAR_AS_NEEDED);
 		scroller.setHorizontalScrollBarPolicy(ScrollPaneConstants.
 				HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		scrollToImage.put(scroller, newImage);
 		return scroller;
 	}
 
+	/**
+	 * TODO : Send something to add this into the panel!
+	 * @param img
+	 * @param msg
+	 */
+	public void addMemento(ImagePanel img, String msg)
+	{
+		mementoList.get(img).states.add
+			(mementoList.get(img).originator.saveInMemento(msg));
+		mementoList.get(img).originator.setCurrentState(img);
+	}
+	
 	/**
 	 * Return the name of the file without any path.
 	 * @param name
@@ -84,11 +127,19 @@ public class Project implements Serializable{
 		return result;
 	}
 	
+	/**
+	 * 
+	 * @return
+	 */
 	public int getListSize()
 	{
 		return imageList.size();
 	}
 	
+	/**
+	 * 
+	 * @param path
+	 */
 	public void setDirectory(String path)
 	{
 		String result = path;
@@ -101,6 +152,21 @@ public class Project implements Serializable{
 		}
 	}
 	
+	public CareTaker getCareTaker(ImagePanel img)
+	{
+		return mementoList.get(img);
+	}
+	
+	public Map<ImagePanel, CareTaker> getMementoList()
+	{
+		return mementoList;
+	}
+	
+	public ArrayList<ImagePanel> getImageList()
+	{
+		return imageList;
+	}
+	
 	public String getDirectory()
 	{
 		return lastDirectory;
@@ -111,8 +177,8 @@ public class Project implements Serializable{
 		return formatName(imageList.get(index).getFileName());
 	}
 	
-	public ImagePanel getImage(int index)
+	public ImagePanel getImage(JScrollPane jsp)
 	{
-		return imageList.get(index);
+		return scrollToImage.get(jsp);
 	}
 }
