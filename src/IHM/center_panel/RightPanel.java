@@ -1,10 +1,13 @@
-package IHM;
+package IHM.center_panel;
 
 import java.awt.Color;
 import java.awt.Dimension;
 
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+
+import IHM.MainWindow;
+import IHM.progress_bar.ProgressScroller;
 
 public class RightPanel extends JPanel{
 	private JTabbedPane topPane;

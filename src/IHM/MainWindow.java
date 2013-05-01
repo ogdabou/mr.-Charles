@@ -15,8 +15,16 @@ import javax.swing.event.MenuListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import IHM.center_panel.FooterBar;
+import IHM.center_panel.PrimaryPanel;
+import IHM.center_panel.RightPanel;
+import IHM.center_panel.ToolBar;
+import IHM.progress_bar.ProgressScroller;
+
 import plugin.IPlugin;
 import plugin.JarLoader;
+import subWindows.BatchWindow;
+import subWindows.NewProjectWindow;
 import sun.tools.jar.resources.jar;
 
 

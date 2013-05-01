@@ -1,4 +1,4 @@
-package IHM;
+package IHM.center_panel;
 
 import java.awt.Dimension;
 

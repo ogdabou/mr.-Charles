@@ -1,4 +1,4 @@
-package IHM;
+package IHM.progress_bar;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.util.ArrayList;
@@ -10,7 +10,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
 import logger.Logger;
-import IHM.ProgressBarPanel;
+import IHM.MainWindow;
+import IHM.progress_bar.ProgressBarPanel;
 
 
 /**

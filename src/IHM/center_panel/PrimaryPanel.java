@@ -1,4 +1,7 @@
-package IHM;
+package IHM.center_panel;
+
+import image.ImagePanel;
+import image.ImageViewer;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -23,6 +26,8 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingWorker;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
+import IHM.progress_bar.ProgressScroller;
 
 import com.sun.org.apache.bcel.internal.generic.LASTORE;
 

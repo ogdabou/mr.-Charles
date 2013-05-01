@@ -1,7 +1,7 @@
 package memento;
 
+import image.ImagePanel;
 import logger.Logger;
-import IHM.ImagePanel;
 
 /**
  * Par fo the Memento Design pattern.

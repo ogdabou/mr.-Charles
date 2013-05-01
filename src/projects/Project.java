@@ -1,6 +1,9 @@
 package projects;
 
 
+import image.ImagePanel;
+import image.ImageViewer;
+
 import java.awt.Dimension;
 
 import java.io.File;
@@ -20,9 +23,7 @@ import com.sun.org.apache.bcel.internal.generic.JsrInstruction;
 import logger.Logger;
 import memento.CareTaker;
 
-import IHM.HystoryScroller;
-import IHM.ImagePanel;
-import IHM.ImageViewer;
+import IHM.center_panel.HystoryScroller;
 
 public class Project implements Serializable{
 

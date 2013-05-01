@@ -1,4 +1,4 @@
-package IHM;
+package IHM.progress_bar;
 
 
 
@@ -9,6 +9,8 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+
+import IHM.MainWindow;
 
 public class ProgressBarPanel extends JPanel{
 

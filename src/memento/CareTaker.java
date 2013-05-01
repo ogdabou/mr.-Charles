@@ -1,11 +1,12 @@
 package memento;
 
+import image.ImagePanel;
+
 import java.util.ArrayList;
 
 import javax.swing.JScrollPane;
 
 import logger.Logger;
-import IHM.ImagePanel;
 
 /**
  * Par of the Memento design pattern.

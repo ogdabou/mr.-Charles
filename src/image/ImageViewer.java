@@ -1,4 +1,4 @@
-package IHM;
+package image;
 
 import java.awt.GridBagLayout;
 

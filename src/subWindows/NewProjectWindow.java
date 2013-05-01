@@ -1,4 +1,4 @@
-package IHM;
+package subWindows;
 
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -10,6 +10,8 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+
+import IHM.MainWindow;
 
 public class NewProjectWindow extends JFrame{
 	private JTextField projectName;
