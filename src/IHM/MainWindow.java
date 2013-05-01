@@ -47,7 +47,7 @@ public class MainWindow extends JFrame implements ActionListener{
 	private NewProjectWindow projectWindow;
 	private BatchWindow batchWindow;
 	private JarLoader jarLoader;
-	private ProgressPane progressPane;
+	private ProgressScroller progressPane;
 	/**
 	 * Constructor
 	 */
@@ -63,10 +63,12 @@ public class MainWindow extends JFrame implements ActionListener{
 		footer = new FooterBar();
 		right = new RightPanel(this);
 		progressPane = right.getProgressPanel();
+
 		toolBar = new ToolBar();
 		panel = new PrimaryPanel();
 		panel.init();
 		panel.setProgressPane(progressPane);
+		panel.setHistoryScroller(right.getHistoryPanel());
 		
 		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
 		this.setPreferredSize(screen);
@@ -84,7 +86,7 @@ public class MainWindow extends JFrame implements ActionListener{
 		this.setJMenuBar(menuBarInit());
 		jarLoader = new JarLoader(bonus, mandatory, this);
 		jarLoader.load();
-		
+		batchWindow.setPrimary(panel);
 		this.setResizable(false);
 		this.setVisible(true);
 	}

@@ -3,6 +3,8 @@ package IHM;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -68,6 +70,24 @@ public class ImagePanel extends JPanel implements Serializable
 		imageType = image.getType();
 		pixels = new int[width * height];
 		image.getRGB(0, 0, width, height, pixels, 0, width);
+	}
+	
+	/**
+	 * TODO : END THIS FUNCTION
+	 * @return
+	 */
+	public ImagePanel getCopy()
+	{
+		BufferedImage copy = null;
+		boolean alpha = this.image.isAlphaPremultiplied();
+		ColorModel model = this.image.getColorModel();
+		
+		WritableRaster wRaster = this.image.copyData(null);
+		
+		copy = new BufferedImage(model, wRaster, alpha, null);
+		ImagePanel img = new ImagePanel(copy, fileName);
+		img.setName(this.getName());
+		return new ImagePanel(copy, fileName);
 	}
 
 	public void size(int width, int height)

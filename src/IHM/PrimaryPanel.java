@@ -4,9 +4,14 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.sql.Savepoint;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -22,6 +27,8 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import com.sun.org.apache.bcel.internal.generic.LASTORE;
 
 import logger.Logger;
+import memento.CareTaker;
+import memento.Originator;
 
 import plugin.IPlugin;
 import projects.Project;
@@ -31,9 +38,11 @@ import projects.Project;
  * @author ogda
  *
  */
-public class PrimaryPanel extends JPanel implements ActionListener{
+public class PrimaryPanel extends JPanel implements ActionListener, MouseListener{
 	private int nbProjects;
 	private ArrayList<Project> projectList;
+	private Map<JTabbedPane, Project> tabToProject;
+	private Map<Project, JTabbedPane> projectToTab;
 	private FilterThread computer;
 	
 	private static final long serialVersionUID = -6382602883374669443L;
@@ -41,13 +50,17 @@ public class PrimaryPanel extends JPanel implements ActionListener{
 	private JTabbedPane projectPane;
 	private JFileChooser fileChooser;
 	private FileFilter filter;
-	private ProgressPane progressPane;
-	public BufferedImage onProcessImage;
+	private ProgressScroller progressPane;
+	private HystoryScroller historyScroller;
+	public ImagePanel onProcessImage;
+	private BufferedImage imageOnThread;
 	public int onProcessImageIndex;
 	/**
 	 * 
 	 */
 	public PrimaryPanel() {
+		tabToProject = new HashMap<JTabbedPane, Project>();
+		projectToTab = new HashMap<Project, JTabbedPane>();
 		fileChooser = new JFileChooser();
 		filter = new FileNameExtensionFilter("Image formats (*.jpg, *.jpeg, *.gif, *.ico, *.bmp)",
 				"jpeg", "gif", "ico", "bmp", "jpg");
@@ -64,6 +77,7 @@ public class PrimaryPanel extends JPanel implements ActionListener{
 	{
 		this.setLayout(mainLayout);
 		projectPane = new JTabbedPane();
+		//projectPane.addMouseListener(this);
 		this.add(projectPane);
 	}
 	
@@ -76,14 +90,18 @@ public class PrimaryPanel extends JPanel implements ActionListener{
 	{
 		Logger.debug("Adding a new project");
 		
-		JTabbedPane imagePane = new JTabbedPane();
+		JTabbedPane imageTabbedPane = new JTabbedPane();
+		imageTabbedPane.addMouseListener(this);
 		JButton loadFirst = new JButton("Click to load image(s)");
 		Project newProject = new Project(name);
+		newProject.setHistoryScrolelr(historyScroller);
 		loadFirst.addActionListener(this);
 		loadFirst.setPreferredSize(new Dimension(100, 100));
-		imagePane.add(loadFirst.getName(), loadFirst);
-		projectPane.add(name ,imagePane);
+		imageTabbedPane.add(loadFirst.getName(), loadFirst);
+		projectPane.add(name ,imageTabbedPane);
 		projectList.add(newProject);
+		tabToProject.put(imageTabbedPane, newProject);
+		projectToTab.put(newProject, imageTabbedPane);
 		nbProjects += 1;
 	}
 	
@@ -98,17 +116,19 @@ public class PrimaryPanel extends JPanel implements ActionListener{
 		{
 			addProject("Untitled-" + nbProjects);
 		}
-
-		int index = projectPane.getSelectedIndex();
-		JScrollPane added = projectList.get(index).addImage(file);
-
-		JTabbedPane pane =  (JTabbedPane)projectPane.getComponentAt(index);
-		if (projectList.get(index).getListSize() <= 1)
+		// get the tabbedPane of the current project
+		JTabbedPane pane = (JTabbedPane)projectPane.getSelectedComponent();
+		// get the concerned project
+		Project addedProject = tabToProject.get(pane);
+		
+		JScrollPane added = addedProject.addImage(file);
+		if (addedProject.getListSize() <= 1)
 		{
 			pane.remove(0);
 		}
-		pane.add(projectList.get(index).getImageFormatedName(projectList.
-				get(index).getListSize() - 1), added);
+		// each onglet of the projectPane contains a JScrollPane
+		pane.add(file.getName(), added);
+		pane.setSelectedIndex(pane.getTabCount() - 1);
 	}
 	/**
 	 * 
@@ -117,34 +137,14 @@ public class PrimaryPanel extends JPanel implements ActionListener{
 	public Project getCurrentProject()
 	{
 		if(projectList.size() >= 0)
-			return projectList.get(getCurrentProjectIndex());
+		{
+			JTabbedPane pane = (JTabbedPane)projectPane.getSelectedComponent();
+			return tabToProject.get(pane);
+		}
 		else
 			return null;
 	}
-	
-	/**
-	 * 
-	 * @return
-	 */
-	public int getCurrentProjectIndex()
-	{
-		Logger.debug("getCurrentProjectIndex = " + 
-							projectPane.getSelectedIndex());
-		return projectPane.getSelectedIndex();
-	}
-	
-	/**
-	 * 
-	 * @return
-	 */
-	public int getCurrentImageIndex()
-	{
-		JTabbedPane pane =  (JTabbedPane)projectPane
-				.getComponentAt(getCurrentImageIndex());
-		Logger.debug("getCurrentImageIndex = " + pane.getSelectedIndex());
-		return pane.getSelectedIndex();
-	}
-	
+
 	/**
 	 * 
 	 */
@@ -200,7 +200,8 @@ public class PrimaryPanel extends JPanel implements ActionListener{
 	}
 	
 	/**
-	 * 
+	 * This function stop the current Filter thread.
+	 * We had stored the old image copy.
 	 */
 	public void stopProcess()
 	{
@@ -208,8 +209,6 @@ public class PrimaryPanel extends JPanel implements ActionListener{
 		{
 			Logger.debug("thread canceled");
 			computer.cancel(true);
-			/*projectList.get(getCurrentProjectIndex())
-			.getImage(getCurrentImageIndex()).setImage(onProcessImage);*/
 		}
 	}
 
@@ -217,7 +216,7 @@ public class PrimaryPanel extends JPanel implements ActionListener{
 	 * 
 	 * @param pane
 	 */
-	public void setProgressPane(ProgressPane pane)
+	public void setProgressPane(ProgressScroller pane)
 	{
 		progressPane = pane;
 	}
@@ -225,9 +224,14 @@ public class PrimaryPanel extends JPanel implements ActionListener{
 	 * 
 	 * @return
 	 */
-	public ProgressPane getProgressPane()
+	public ProgressScroller getProgressPane()
 	{
 		return progressPane;
+	}
+	
+	public JTabbedPane getProjectTab(Project p)
+	{
+		return projectToTab.get(p);
 	}
 	
 	/**
@@ -250,46 +254,77 @@ public class PrimaryPanel extends JPanel implements ActionListener{
 		}
 		
 	}
-}
-
-/**
- * Used to thread our batched script!
- * We have to update a JScrollPane,
- * to use this we use the
- * getViewPort().add() because the .add method does'nt work.
- * @author ogda
- *
- */
-class BatchFilterThread extends SwingWorker
-{
-	private IPlugin filter;
-	private PrimaryPanel parent;
 	
-	public BatchFilterThread(IPlugin filter, PrimaryPanel primary) {
-		parent = primary;
+	public void setHistoryScroller(HystoryScroller h)
+	{
+		this.historyScroller = h;
+	}
+
+	/**
+	 * Return the ImagePanel selected by the user
+	 * @return
+	 */
+	public ImagePanel getCurrentImage()
+	{
+		Project currentP = getCurrentProject();
+		JTabbedPane pane = getProjectTab(currentP);
+		JScrollPane scrollPanel = (JScrollPane)pane.getComponent(pane.getSelectedIndex());
+		ImagePanel image = currentP.getImage(scrollPanel);
+		return image;
+	}
+	
+	/**
+	 * Return the current JScrollPane
+	 * @return
+	 */
+	public JScrollPane getCurrentScrollPane()
+	{
+		Project currentP = getCurrentProject();
+		JTabbedPane pane = getProjectTab(currentP);
+		return (JScrollPane)pane.getComponent(pane.getSelectedIndex());
+	}
+	
+	public HystoryScroller getHistoryScroller()
+	{
+		return historyScroller;
+	}
+	
+	/**
+	 * Implements CareTaker.
+	 * Save the currentImage to a memento.
+	 */
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		Project currentProject = getCurrentProject();
+		ImagePanel img = getCurrentImage();
+		historyScroller.redraw(currentProject.getMementoList().get(img));
 		
-		this.filter = filter;
 	}
 
 	@Override
-	protected Object doInBackground() throws Exception {
-		int index = parent.getProjectPane().getSelectedIndex();
-		JTabbedPane pane = (JTabbedPane)parent.getProjectPane()
-				.getComponentAt(index);
-		Project currentP = parent.getProjectList().get(index);
-		ImagePanel image = currentP.getImage(pane.getSelectedIndex());
+	public void mouseEntered(MouseEvent e) {
+		//System.out.println("entered" + e);
+		
+	}
 
-		Logger.debug("Applying " + filter.getName() + " on " + image.getName());
+	@Override
+	public void mouseExited(MouseEvent e) {
+		//System.out.println("exited" + e);
+		
+	}
 
-		JScrollPane panel = (JScrollPane)pane.getComponent(pane.getSelectedIndex());
-		ImageViewer viewer = new ImageViewer(image);
+	@Override
+	public void mousePressed(MouseEvent e) {
+		//System.out.println("pressed" + e);
+		
+	}
 
-		BufferedImage result = filter.perform(image.image);
-		image.setImage(result);
-		panel.getViewport().add(viewer);
-		parent.getProgressPane().removeProgress(filter.getName());
-		return null;
-	}	
+	@Override
+	public void mouseReleased(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
 }
 
 /**
@@ -304,6 +339,7 @@ class FilterThread extends SwingWorker
 {
 	private IPlugin filter;
 	private PrimaryPanel parent;
+	private BufferedImage oldPicture;
 	
 	public FilterThread(IPlugin filter, PrimaryPanel primary) {
 		parent = primary;
@@ -313,22 +349,34 @@ class FilterThread extends SwingWorker
 
 	@Override
 	protected Object doInBackground() throws Exception {
-		int index = parent.getProjectPane().getSelectedIndex();
-		JTabbedPane pane = (JTabbedPane)parent.getProjectPane()
-				.getComponentAt(index);
-		Project currentP = parent.getProjectList().get(index);
-		ImagePanel image = currentP.getImage(pane.getSelectedIndex());
-		parent.onProcessImage = image.image;
+
+		Project currentP = parent.getCurrentProject();
+		JTabbedPane pane = parent.getProjectTab(currentP);
+		JScrollPane scrollPanel = (JScrollPane)pane.getComponent(pane.getSelectedIndex());
+		ImagePanel image = currentP.getImage(scrollPanel);
+		
+		oldPicture = image.getCopy().image;
 
 		Logger.debug("Applying " + filter.getName() + " on " + image.getName());
 
-		JScrollPane panel = (JScrollPane)pane.getComponent(pane.getSelectedIndex());
 		ImageViewer viewer = new ImageViewer(image);
 
 		BufferedImage result = filter.perform(image.image);
-		image.setImage(result);
-		panel.getViewport().add(viewer);
+		if (!this.isCancelled())
+		{
+			Logger.debug("Thread ending normaly");
+			image.setImage(result);
+			Logger.debug("addMemento for :" + image.getName());
+			currentP.addMemento(image, "Filter: " + filter.getName());
+		}
+		else
+		{
+			Logger.debug("Thread cancelled.");
+			image.setImage(oldPicture);
+		}
+		scrollPanel.getViewport().add(viewer);
 		parent.getProgressPane().removeProgress(filter.getName());
+		parent.getHistoryScroller().redraw(currentP.getMementoList().get(image));
 		return null;
 	}	
 }
