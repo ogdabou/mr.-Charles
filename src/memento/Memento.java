@@ -1,5 +1,12 @@
 package memento;
 
+import java.awt.Dimension;
+import java.io.Serializable;
+
+import javax.swing.JApplet;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+
 import image.ImagePanel;
 import logger.Logger;
 
@@ -11,13 +18,28 @@ import logger.Logger;
  * @author ogda
  *
  */
-public class Memento {
+public class Memento implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private ImagePanel savedImage;
 	private String message;
+	boolean valid = true;
 	
 	public Memento(String msg, ImagePanel toSave) {
 		message = msg;
 		savedImage = toSave.getCopy();
+	}
+	
+	public boolean isValid()
+	{
+		return valid;
+	}
+	
+	public void setValid(boolean b)
+	{
+		valid = b;
 	}
 	
 	public String getMessage()

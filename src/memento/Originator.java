@@ -1,5 +1,10 @@
 package memento;
 
+import java.awt.Dimension;
+import java.io.Serializable;
+
+import javax.swing.JFrame;
+
 import image.ImagePanel;
 import logger.Logger;
 
@@ -10,10 +15,18 @@ import logger.Logger;
  * @author ogda
  *
  */
-public class Originator {
+public class Originator implements Serializable{
 
-	ImagePanel currentState;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	public ImagePanel currentState;
+	private String message;
 	
+	/**
+	 * 
+	 */
 	public Originator()
 	{
 		Logger.debug("Creating a new Originator");
@@ -39,8 +52,18 @@ public class Originator {
 	 */
 	public Memento saveInMemento(String message)
 	{
-		Logger.debug("Saving current state");
+		Logger.debug("Saving current state" + currentState.getName());
+		this.message = message;
 		return new Memento(message, currentState);
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public String getMessage()
+	{
+		return message;
 	}
 	
 	/**
@@ -49,7 +72,7 @@ public class Originator {
 	 */
 	public void restore(Memento memento)
 	{
-		Logger.debug("Rollback requested");
+		//Logger.debug("Rollback requested");
 		currentState = memento.getState();
 	}
 }

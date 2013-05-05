@@ -23,13 +23,11 @@ public class ImagePanel extends JPanel implements Serializable
 
 	private static final long serialVersionUID = -314171089120047242L;
 	private String fileName;
-	private final int width;
-	private final int height;
-	private final int imageType;
-	private final int[] pixels;
+	private int width;
+	private int height;
+	private int imageType;
+	private int[] pixels;
 	public transient BufferedImage image;
-	public transient BufferedImage view;
-	private BufferedImage source;
 
 	/**
 	 * Create the ImagePanel
@@ -41,7 +39,6 @@ public class ImagePanel extends JPanel implements Serializable
 	{
 		fileName = name;
 		this.image = image;
-		source = image;
 		width = image.getWidth();
 		height = image.getHeight();
 		imageType = image.getType();
@@ -87,9 +84,40 @@ public class ImagePanel extends JPanel implements Serializable
 		copy = new BufferedImage(model, wRaster, alpha, null);
 		ImagePanel img = new ImagePanel(copy, fileName);
 		img.setName(this.getName());
-		return new ImagePanel(copy, fileName);
+		return img;
 	}
 
+	private void writeObject(java.io.ObjectOutputStream out)throws IOException
+	{
+		out.writeObject(fileName);
+
+		ImageIO.write(image, fileName.substring(fileName.lastIndexOf('.') + 1),
+				ImageIO.createImageOutputStream(out));
+		Logger.debug("image saved in project");
+	}
+	
+	private void readObject(java.io.ObjectInputStream in)throws IOException
+	{
+
+		
+		try {
+			fileName = (String)in.readObject();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		image=ImageIO.read(ImageIO.createImageInputStream(in));
+		
+		width = image.getWidth();
+		height = image.getHeight();
+		imageType = image.getType();
+		pixels = new int[width * height];
+	}
+	
+	/**
+	 * 
+	 * @param width
+	 * @param height
+	 */
 	public void size(int width, int height)
 	{
 		Image current = image.getScaledInstance(500, 600, 
@@ -97,7 +125,6 @@ public class ImagePanel extends JPanel implements Serializable
 		BufferedImage nImage = new BufferedImage(current.getWidth(null),
 				current.getHeight(null),
 				image.getType());
-		view = nImage;
 	}
 	
 	/**

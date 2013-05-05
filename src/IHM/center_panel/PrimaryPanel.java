@@ -99,7 +99,6 @@ public class PrimaryPanel extends JPanel implements ActionListener, MouseListene
 		imageTabbedPane.addMouseListener(this);
 		JButton loadFirst = new JButton("Click to load image(s)");
 		Project newProject = new Project(name);
-		newProject.setHistoryScrolelr(historyScroller);
 		loadFirst.addActionListener(this);
 		loadFirst.setPreferredSize(new Dimension(100, 100));
 		imageTabbedPane.add(loadFirst.getName(), loadFirst);
@@ -127,6 +126,7 @@ public class PrimaryPanel extends JPanel implements ActionListener, MouseListene
 		Project addedProject = tabToProject.get(pane);
 		
 		JScrollPane added = addedProject.addImage(file);
+
 		if (addedProject.getListSize() <= 1)
 		{
 			pane.remove(0);
@@ -134,6 +134,7 @@ public class PrimaryPanel extends JPanel implements ActionListener, MouseListene
 		// each onglet of the projectPane contains a JScrollPane
 		pane.add(file.getName(), added);
 		pane.setSelectedIndex(pane.getTabCount() - 1);
+		historyScroller.redraw(addedProject.getMementoList().get(this.getCurrentImage()));
 	}
 	/**
 	 * 
@@ -150,6 +151,34 @@ public class PrimaryPanel extends JPanel implements ActionListener, MouseListene
 			return null;
 	}
 
+	public void loadProject(Project newProject)
+	{
+		Logger.debug("Adding a new project");
+		
+		JTabbedPane imageTabbedPane = new JTabbedPane();
+		imageTabbedPane.addMouseListener(this);
+		projectPane.add(newProject.getName() ,imageTabbedPane);
+		projectList.add(newProject);
+		tabToProject.put(imageTabbedPane, newProject);
+		projectToTab.put(newProject, imageTabbedPane);
+		nbProjects += 1;
+		ArrayList<ImagePanel> imgList = newProject.getImageList();
+		for (ImagePanel image : imgList)
+		{
+			loadImage(image, newProject, imageTabbedPane);
+		}
+	}
+	
+	public void loadImage(ImagePanel image, Project newProject, JTabbedPane projectPane)
+	{
+		
+		JScrollPane added = newProject.loadImage(image);
+
+		projectPane.add(image.getName(), added);
+		projectPane.setSelectedIndex(projectPane.getTabCount() - 1);
+		historyScroller.redraw(newProject.getMementoList().get(this.getCurrentImage()));
+	}
+	
 	/**
 	 * 
 	 */
@@ -200,7 +229,7 @@ public class PrimaryPanel extends JPanel implements ActionListener, MouseListene
 	{
 		computer = new FilterThread(filter, this);
 		progressPane.addProgress(filter.getName());
-		this.revalidate();
+		this.repaint();
 		computer.execute();
 	}
 	
@@ -278,6 +307,12 @@ public class PrimaryPanel extends JPanel implements ActionListener, MouseListene
 		return image;
 	}
 	
+	public void setCurrentImage(ImagePanel image)
+	{
+		getCurrentImage().image = image.image;
+		this.repaint();
+	}
+	
 	/**
 	 * Return the current JScrollPane
 	 * @return
@@ -303,8 +338,7 @@ public class PrimaryPanel extends JPanel implements ActionListener, MouseListene
 	public void mouseClicked(MouseEvent e) {
 		Project currentProject = getCurrentProject();
 		ImagePanel img = getCurrentImage();
-		historyScroller.redraw(currentProject.getMementoList().get(img));
-		
+		historyScroller.redraw(currentProject.getMementoList().get(img));historyScroller.redraw(currentProject.getMementoList().get(img));
 	}
 
 	@Override
@@ -363,7 +397,6 @@ class FilterThread extends SwingWorker
 		oldPicture = image.getCopy().image;
 
 		Logger.debug("Applying " + filter.getName() + " on " + image.getName());
-
 		ImageViewer viewer = new ImageViewer(image);
 
 		BufferedImage result = filter.perform(image.image);
@@ -372,7 +405,9 @@ class FilterThread extends SwingWorker
 			Logger.debug("Thread ending normaly");
 			image.setImage(result);
 			Logger.debug("addMemento for :" + image.getName());
-			currentP.addMemento(image, "Filter: " + filter.getName());
+			ImagePanel resultImage = new ImagePanel(result, image.getName());
+			currentP.getCareTaker(image).addToMemento("Filter: " + filter.getName());
+			//currentP.addMemento(resultImage, "Filter: " + filter.getName());
 		}
 		else
 		{

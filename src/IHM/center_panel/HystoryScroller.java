@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
@@ -18,18 +20,25 @@ import memento.CareTaker;
 import memento.Memento;
 
 public class HystoryScroller extends JScrollPane implements MouseListener{
-	private ArrayList<JLabel> stateList;
+	private Map<JLabel, Integer> stateList;
+	private Map<JLabel, CareTaker> takerList;
 	private JPanel mainPanel;
+	private PrimaryPanel centerPanel;
 
 	public HystoryScroller() {
 		mainPanel = new JPanel();
 		mainPanel.setBackground(Color.WHITE);
-		stateList = new ArrayList<JLabel>();
-
+		stateList = new HashMap<JLabel, Integer>();
+		takerList = new HashMap<JLabel, CareTaker>();
+		
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.PAGE_AXIS));
 		this.getViewport().add(mainPanel);
 	}
 	
+	public void setPrimaryPanel(PrimaryPanel p)
+	{
+		centerPanel = p;
+	}
 	
 	public void redraw(CareTaker careTaker)
 	{
@@ -38,32 +47,50 @@ public class HystoryScroller extends JScrollPane implements MouseListener{
 		mainPanel.removeAll();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.PAGE_AXIS));
 
+		int cpt = 0;
 		for (Memento memento : careTaker.getList())
 		{
 			memento.print();
 			JPanel gate = new JPanel();
 			JLabel label = new JLabel(memento.getMessage());
+			if (!memento.isValid())
+				label.setForeground(Color.LIGHT_GRAY);
+			if (cpt > careTaker.currentMementoIndex)
+				label.setForeground(Color.LIGHT_GRAY);
 			gate.add(label);
 			gate.setPreferredSize(new Dimension(235, 20));
 			gate.setMaximumSize(new Dimension(235, 20));
 			gate.addMouseListener(this);
 			mainPanel.add(gate);
+			stateList.put(label, cpt);
+			takerList.put(label, careTaker);
+			cpt += 1;
 		}
 		this.getViewport().add(mainPanel);
-		this.revalidate();
+		this.repaint();
 	}
 
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		Logger.debug("Clicking on history");
+		Logger.debug("Restoring requested");
+		
 		JPanel l = (JPanel)e.getComponent();
-		if (e.getClickCount() % 2 == 0)
+		if (e.getClickCount() == 2)
+		{
 			l.setBackground(Color.GRAY);
+			JLabel label = (JLabel)l.getComponent(0);
+			CareTaker c = takerList.get(label);
+			c.restoreToState(stateList.get(label));
+			Logger.debug("Restoring to sate " + stateList.get(label) +
+					" msg "+ c.originator.getMessage());
+			centerPanel.setCurrentImage(c.originator.currentState);
+			centerPanel.repaint();
+			this.redraw(c);
+		}
 		else {
 			l.setBackground(Color.WHITE);
 		}
-		//l.revalidate();
 	}
 
 

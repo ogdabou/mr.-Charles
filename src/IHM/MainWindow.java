@@ -23,6 +23,9 @@ import IHM.progress_bar.ProgressScroller;
 
 import plugin.IPlugin;
 import plugin.JarLoader;
+import projects.Project;
+import saver.ImageSaver;
+import saver.ProjectSaver;
 import subWindows.BatchWindow;
 import subWindows.NewProjectWindow;
 import sun.tools.jar.resources.jar;
@@ -43,6 +46,8 @@ public class MainWindow extends JFrame implements ActionListener{
 	private JMenuItem openProject;
 	private JMenuItem openFile;
 	private JMenuItem exit;
+	private JMenuItem saveProject;
+	private JMenuItem saveImage;
 	private JMenu filters;
 	private JMenu mandatory;
 	private JMenu bonus;
@@ -60,6 +65,17 @@ public class MainWindow extends JFrame implements ActionListener{
 	 * Constructor
 	 */
 	public MainWindow() {
+		/*try {
+			UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (UnsupportedLookAndFeelException e) {
+			e.printStackTrace();
+		}*/
 		batchWindow = new BatchWindow();
 		plugins = new ArrayList<IPlugin>();
 		this.setTitle("myPhotoshop - couty_a");
@@ -77,6 +93,7 @@ public class MainWindow extends JFrame implements ActionListener{
 		panel.init();
 		panel.setProgressPane(progressPane);
 		panel.setHistoryScroller(right.getHistoryPanel());
+		panel.getHistoryScroller().setPrimaryPanel(panel);
 		
 		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
 		this.setPreferredSize(screen);
@@ -107,6 +124,7 @@ public class MainWindow extends JFrame implements ActionListener{
 		Logger.debug("Action on: " + a.getActionCommand());
 		String name = (String)a.getActionCommand();
 		JFileChooser projectFinder = null;
+		
 		if (panel.getListSize() != 0 && !panel.getCurrentProject().getDirectory().equals(""))
 		{
 			projectFinder = new JFileChooser(new File(panel.getCurrentProject().getDirectory()));
@@ -121,6 +139,13 @@ public class MainWindow extends JFrame implements ActionListener{
 			FileFilter filter = new FileNameExtensionFilter("*.myPSD", "myPSD");
 			projectFinder.setFileFilter(filter);
 			projectFinder.showOpenDialog(this);
+			File projectFile = projectFinder.getSelectedFile();
+			if (projectFile != null)
+			{
+				Project newProject = ProjectSaver.openProject(projectFile);
+				if (newProject != null)
+					panel.loadProject(newProject);
+			}
 		}
 		else if (name.equals("Open file"))
 		{
@@ -165,6 +190,14 @@ public class MainWindow extends JFrame implements ActionListener{
 				batchWindow.fillImagesBoxes(panel.getCurrentProject());
 			batchWindow.fillPluginsBoxes(plugins);
 			batchWindow.setVisible(true);
+		}
+		else if (name.equals("Save current image"))
+		{
+			ImageSaver.saveImage(panel.getCurrentImage(), this);
+		}
+		else if (name.equals("Save project"))
+		{
+			ProjectSaver.saveProject(panel.getCurrentProject(), this);
 		}
 		else
 		{
@@ -234,6 +267,15 @@ public class MainWindow extends JFrame implements ActionListener{
 		file.add(openProject);
 		file.add(openFile);
 		file.addSeparator();
+		
+		saveImage = new JMenuItem("Save current image");
+		saveImage.addActionListener(this);
+		saveProject = new JMenuItem("Save project");
+		saveProject.addActionListener(this);
+		file.add(saveProject);
+		file.add(saveImage);
+		file.addSeparator();
+		
 		
 		exit = new JMenuItem("Exit");
 		exit.addActionListener(this);

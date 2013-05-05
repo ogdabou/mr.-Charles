@@ -30,7 +30,7 @@ public class JarLoader {
 	private JMenu mandatory;
 	private MainWindow mainWindow;
 	
-	public JarLoader(JMenu bonu, JMenu mandatory, MainWindow mainWindow)
+	public JarLoader(JMenu bonus, JMenu mandatory, MainWindow mainWindow)
 	{
 		this.mainWindow = mainWindow;
 		this.bonus = bonus;
@@ -47,7 +47,9 @@ public class JarLoader {
 			try {
 				try {
 					jarFile = new JarFile(current);
-				} catch (IOException e1) {
+				}
+				catch (IOException e1) 
+				{
 					Logger.error("IO exception while trying to open JAR at :" + current);
 				}
 				e = jarFile.entries();
@@ -87,7 +89,10 @@ public class JarLoader {
 				JMenuItem newFilterMenu = new JMenuItem(newPlugin.getName());
 				newFilterMenu.addActionListener(mainWindow);
 				mainWindow.addFilter(newPlugin);
-				mandatory.add(newFilterMenu);
+				if (className.contains("basic"))
+					mandatory.add(newFilterMenu);
+				else
+					bonus.add(newFilterMenu);
 			} catch (InstantiationException
 					| IllegalAccessException e1) {
 				e1.printStackTrace();

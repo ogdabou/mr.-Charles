@@ -7,27 +7,29 @@ TODO		couty_a
 		[x] CreateNew
 		[x] CreateNew when opening image without projects
 		[x] Add Image
-	[-] Plugins
+	[x] Plugins
 		[x] JarLoader
 		[x] Apply
-		[-] Thread
-		[-] Stopping Thread
-		[-] Invert Colors
-		[-] GreyScale
-		[-] Binary
-		[-] Rotate Left
-		[-] Rotate right
-		[-] Flip horizontal
-		[-] Flip Vertical
-	[-] History
-		[-] One hystory per image file
-		[-] Memento deign pattern
+		[x] Thread
+		[X] Stopping Thread
+		[x] Invert Colors
+		[X] GreyScale
+		[x] Binary
+		[x] Rotate Left
+		[x] Rotate right
+		[x] Flip horizontal
+		[x] Flip Vertical
+	[x] History
+		[x] One hystory per image file
+		[x] Memento deign pattern
 		
 [x] Bonus Done
 	[x] Multi project handling
+	[x] Multi History per project
 	[x] Multi files per project
 	[x] Hotkeys
-	[x] Scrolling Area	
+	[x] Scrolling Area
+	[x] --debug option
 	
 [-] Ideas
 	[-] Batch processing

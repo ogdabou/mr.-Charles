@@ -25,7 +25,8 @@ import memento.CareTaker;
 
 import IHM.center_panel.HystoryScroller;
 
-public class Project implements Serializable{
+public class Project implements Serializable
+{
 
 	//TODO currently i have to store the JFILEchoose. but i may change it and using tab.getslectedindec() instead.
 	private static final long serialVersionUID = -8160058076788488205L;
@@ -36,7 +37,6 @@ public class Project implements Serializable{
 	private String lastDirectory;
 	private Map<ImagePanel, CareTaker> mementoList = new HashMap<ImagePanel,
 			CareTaker>();
-	private HystoryScroller historyScroller;
 	
 	/**
 	 * 
@@ -51,11 +51,7 @@ public class Project implements Serializable{
 		this.name = name;
 		imageList = new ArrayList<ImagePanel>();
 	}
-	
-	public void setHistoryScrolelr(HystoryScroller s)
-	{
-		this.historyScroller = s;
-	}
+
 	/**
 	 * Add an image to the current prindexoject
 	 * We use a Jpanel with a GridBagLayout to center the image.
@@ -86,8 +82,28 @@ public class Project implements Serializable{
 		careTaker.states.add(careTaker.originator.
 				saveInMemento(newImage.getName() + " opened"));
 		mementoList.put(newImage, careTaker);
+
+		ImageViewer viewer = new ImageViewer(newImage);
 		
-		historyScroller.redraw(mementoList.get(newImage));
+		JScrollPane scroller = new JScrollPane(viewer);
+		
+		scroller.setLayout(new ScrollPaneLayout());
+		scroller.setVerticalScrollBarPolicy(ScrollPaneConstants.
+				VERTICAL_SCROLLBAR_AS_NEEDED);
+		scroller.setHorizontalScrollBarPolicy(ScrollPaneConstants.
+				HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		scrollToImage.put(scroller, newImage);
+		return scroller;
+	}
+	
+	public JScrollPane loadImage(ImagePanel newImage)
+	{
+		Logger.debug("Adding image");
+
+		newImage.setPreferredSize(new Dimension(newImage.getWidth(),
+				newImage.getHeight()));
+		newImage.setMinimumSize(new Dimension(newImage.getWidth(),
+				newImage.getHeight()));
 
 		ImageViewer viewer = new ImageViewer(newImage);
 		
@@ -181,5 +197,10 @@ public class Project implements Serializable{
 	public ImagePanel getImage(JScrollPane jsp)
 	{
 		return scrollToImage.get(jsp);
+	}
+	
+	public String getName()
+	{
+		return name;
 	}
 }

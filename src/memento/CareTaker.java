@@ -2,6 +2,7 @@ package memento;
 
 import image.ImagePanel;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import javax.swing.JScrollPane;
@@ -14,14 +15,35 @@ import logger.Logger;
  * @author ogda
  *
  */
-public class CareTaker {
+public class CareTaker implements Serializable{
 	
+	private static final long serialVersionUID = 1L;
+	/**
+	 * 
+	 */
 	public ArrayList<Memento> states = new ArrayList<Memento>();
+	public int currentMementoIndex = 1;
 	public Originator originator = new Originator();
 	
 	public void addToMemento(String message) 
 	{
-		states.add(originator.saveInMemento("Coucou les amis"));
+		Logger.debug(states.size() + " " + currentMementoIndex);
+		if (currentMementoIndex >= states.size())
+		{
+			states.add(originator.saveInMemento(message));
+			currentMementoIndex += 1;
+		}
+		else if (currentMementoIndex < states.size())
+		{
+			states.add(originator.saveInMemento(message));
+			for(int i = states.size() - 2; i > currentMementoIndex; i--)
+			{
+				Memento m = states.get(i);
+				Logger.debug("Removing " + m.getMessage() + " at index = " + i);
+				states.remove(i);
+			}
+			currentMementoIndex += 1;
+		}
 	}
 	
 	/**
@@ -29,11 +51,9 @@ public class CareTaker {
 	 */
 	public void restoreToState(int stateIndex)
 	{
-		Logger.debug("Restoring pevious image");
-		//JScrollPane scrollPanel = getCurrentScrollPane();
-		ImagePanel image = states.get(stateIndex).getState();
+		currentMementoIndex = stateIndex;
+		Logger.debug("Rollback requested to: " + stateIndex);
 		originator.restore(states.get(stateIndex));
-		image = states.get(stateIndex).getState();	
 	}
 	
 	public ArrayList<Memento> getList()

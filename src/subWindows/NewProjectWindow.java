@@ -23,7 +23,8 @@ public class NewProjectWindow extends JFrame{
 	public NewProjectWindow(MainWindow parent)
 	{
 		this.setTitle("myPhotoshop - couty_a");
-		this.setMinimumSize(new Dimension(400, 400));
+		this.setLocationRelativeTo(null);
+		//this.setMinimumSize(new Dimension(400, 400));
 		this.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		
 		pan = new JPanel();

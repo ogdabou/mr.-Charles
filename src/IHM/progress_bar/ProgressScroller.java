@@ -63,7 +63,7 @@ public class ProgressScroller extends JScrollPane{
 		container.remove(filterQueue.get(threadName).get(0));
 		filterQueue.get(threadName).remove(0);
 		this.getViewport().add(container);
-		this.revalidate();
+		this.repaint();
 		
 	}
 }
