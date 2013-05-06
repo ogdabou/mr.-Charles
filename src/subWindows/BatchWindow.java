@@ -26,6 +26,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListModel;
+import javax.swing.SwingWorker;
 
 import logger.Logger;
 
@@ -56,6 +57,8 @@ public class BatchWindow extends JFrame implements ActionListener{
 	private Map<ButtonModel, IPlugin> pluginMap = new HashMap<ButtonModel, IPlugin>();
 	private Map<JCheckBox, ImagePanel> buttonlist = new HashMap<JCheckBox,
 			ImagePanel>();
+	
+	private IPlugin plugin;
 	
 	private PrimaryPanel primary;
 	private ButtonGroup radioGroup = new ButtonGroup();
@@ -181,12 +184,25 @@ public class BatchWindow extends JFrame implements ActionListener{
 		{
 			Logger.debug("Creating new BATCH");
 			Set<JCheckBox> s = buttonlist.keySet();
-			IPlugin plugin = pluginMap.get(radioGroup.getSelection());
+			plugin = pluginMap.get(radioGroup.getSelection());
 			
 			progressPane.createBatchBar(s.size());
 			progressPane.showProgress();
 			primary.getTopPanel().add(progressPane.getBatchProgress());
+
+			ArrayList<ImagePanel> toCompute = new ArrayList<ImagePanel>();
 			for (JCheckBox b : s)
+			{
+				if(b.isSelected())
+				{
+					toCompute.add(buttonlist.get(b));
+
+				}
+			}
+			BatchComputer computer = new BatchComputer(primary, plugin,
+					toCompute);
+			computer.execute();
+			/*for (JCheckBox b : s)
 			{
 				if(b.isSelected())
 				{
@@ -195,7 +211,7 @@ public class BatchWindow extends JFrame implements ActionListener{
 					primary.getProgressPane().repaintAll();
 				}
 			}
-			primary.getTopPanel().repaint();
+			primary.getTopPanel().repaint();*/
 			this.setVisible(false);
 		}
 		else if (name.equals("Select All"))
@@ -211,4 +227,34 @@ public class BatchWindow extends JFrame implements ActionListener{
 			this.setVisible(false);
 		}
 	}
+}
+
+class BatchComputer extends SwingWorker
+{
+	private PrimaryPanel primary;
+	private IPlugin plugin;
+	private ArrayList<ImagePanel>  imageList;
+	
+	
+	public BatchComputer(PrimaryPanel primary, IPlugin plugin,
+			ArrayList<ImagePanel> toCompute)
+	{
+		this.primary = primary;
+		this.plugin = plugin;
+		this.imageList = toCompute;
+	}
+	
+	@Override
+	protected Object doInBackground() throws Exception {
+		Logger.debug("Executing Batch with " + plugin.getName());
+		for (ImagePanel image : imageList)
+		{
+
+			primary.getProjectPane().repaint();
+			primary.computeBatch(plugin, image);
+			primary.repaint();
+		}
+		return null;
+	}
+	
 }

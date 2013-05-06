@@ -267,6 +267,7 @@ public class PrimaryPanel extends JPanel implements ActionListener,
 	 */
 	public void computeBatch(IPlugin plugin, ImagePanel image)
 	{
+		Logger.debug("exec :" + plugin.getName() + " on " + image.getName());
 		BatchThread t = new BatchThread(plugin, this, image, getCurrentProject());
 		progressPane.addProgress(plugin.getName());
 		t.execute();
