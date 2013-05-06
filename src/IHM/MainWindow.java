@@ -19,6 +19,7 @@ import IHM.center_panel.FooterBar;
 import IHM.center_panel.PrimaryPanel;
 import IHM.center_panel.RightPanel;
 import IHM.center_panel.ToolBar;
+import IHM.center_panel.TopPanel;
 import IHM.progress_bar.ProgressScroller;
 
 import plugin.IPlugin;
@@ -61,12 +62,14 @@ public class MainWindow extends JFrame implements ActionListener{
 	private BatchWindow batchWindow;
 	private JarLoader jarLoader;
 	private ProgressScroller progressPane;
+	private TopPanel topPanel;
 	/**
 	 * Constructor
 	 */
 	public MainWindow() {
-		/*try {
-			UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+		try {
+			//UIManager.setLookAndFeel("javax.swing.plaf.gtk.GTKLookAndFeel");
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		} catch (InstantiationException e) {
@@ -75,7 +78,8 @@ public class MainWindow extends JFrame implements ActionListener{
 			e.printStackTrace();
 		} catch (UnsupportedLookAndFeelException e) {
 			e.printStackTrace();
-		}*/
+		}
+		topPanel = new TopPanel();
 		batchWindow = new BatchWindow();
 		plugins = new ArrayList<IPlugin>();
 		this.setTitle("myPhotoshop - couty_a");
@@ -94,17 +98,20 @@ public class MainWindow extends JFrame implements ActionListener{
 		panel.setProgressPane(progressPane);
 		panel.setHistoryScroller(right.getHistoryPanel());
 		panel.getHistoryScroller().setPrimaryPanel(panel);
+		panel.setFooter(footer);
+		panel.setTopPanel(topPanel);
 		
 		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
 		this.setPreferredSize(screen);
 		this.setMinimumSize(screen);
 
-		JPanel lol = new JPanel();
-		lol.setPreferredSize(new Dimension(102, 10));
-		this.add(lol, BorderLayout.NORTH);
+		/*JPanel lol = new JPanel();
+		lol.setPreferredSize(new Dimension(102, 10));*/
+		this.add(topPanel, BorderLayout.NORTH);
 		
 		this.add(panel, BorderLayout.CENTER);
 		this.add(footer, BorderLayout.SOUTH);
+		//this.add(new Separator(), BorderLayout.SOUTH);
 		this.add(right, BorderLayout.EAST);
 		this.add(toolBar, BorderLayout.WEST);
 		
@@ -142,25 +149,51 @@ public class MainWindow extends JFrame implements ActionListener{
 			File projectFile = projectFinder.getSelectedFile();
 			if (projectFile != null)
 			{
-				Project newProject = ProjectSaver.openProject(projectFile);
+				topPanel.add(panel.getProgressPane().createProjectLoaderBar());
+				topPanel.revalidate();
+				topPanel.setVisible(true);
+				this.revalidate();
+				ProjectSaver.openProject(this, projectFile,
+						panel.getProgressPane().getProjectBar());
+				/*Project newProject = ProjectSaver.openProject(projectFile);
 				if (newProject != null)
-					panel.loadProject(newProject);
+					panel.loadProject(newProject);*/
+				//topPanel.remove(panel.getProgressPane().getProjectBar());
 			}
 		}
 		else if (name.equals("Open file"))
 		{
+			JFileChooser fileChooser = new JFileChooser();
+			fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 			Logger.debug("File opening requested.");
 			FileFilter filter = new FileNameExtensionFilter("Image formats (*.jpg, *.jpeg, *.gif, *.ico, *.bmp)",
 					"jpeg", "gif", "ico", "bmp", "jpg");
-			projectFinder.setFileFilter(filter);
-			projectFinder.setName("Add file to the current project");
-			projectFinder.showOpenDialog(this);
-			File choosen = projectFinder.getSelectedFile();
+			fileChooser.setFileFilter(filter);
+			fileChooser.setName("Add file to the current project");
+			fileChooser.showOpenDialog(this);
+
+			File choosen = fileChooser.getSelectedFile();
 			if(choosen != null)
 			{
-				panel.addImage(choosen);
-				if (panel.getListSize() != 0)
-					panel.getCurrentProject().setDirectory(choosen.getPath());
+				if (choosen.isDirectory())
+				{
+					for (File file : choosen.listFiles())
+					{
+						if (file != null)
+						{
+							panel.addImage(file);
+							if (panel.getListSize() != 0)
+								panel.getCurrentProject().setDirectory(file.getPath());
+						}
+					}
+				}
+				else
+				{
+					
+					panel.addImage(choosen);
+					if (panel.getListSize() != 0)
+						panel.getCurrentProject().setDirectory(choosen.getPath());
+				}
 			}
 		}
 		else if (name.equals("New project"))
@@ -240,6 +273,15 @@ public class MainWindow extends JFrame implements ActionListener{
 		plugins.add(p);
 	}
 	
+	public TopPanel getTop()
+	{
+		return topPanel;
+	}
+	
+	public PrimaryPanel getPrimaryPanel()
+	{
+		return panel;
+	}
 	
 	/**
 	 * Main window MenuBar initialization

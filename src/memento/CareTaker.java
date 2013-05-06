@@ -25,6 +25,10 @@ public class CareTaker implements Serializable{
 	public int currentMementoIndex = 1;
 	public Originator originator = new Originator();
 	
+	/**
+	 * We save the current states
+	 * @param message
+	 */
 	public void addToMemento(String message) 
 	{
 		Logger.debug(states.size() + " " + currentMementoIndex);

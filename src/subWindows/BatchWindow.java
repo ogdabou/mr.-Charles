@@ -9,19 +9,29 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
+import javax.swing.ButtonModel;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.ListModel;
+
+import logger.Logger;
 
 import IHM.Separator;
 import IHM.center_panel.PrimaryPanel;
+import IHM.progress_bar.ProgressScroller;
 
 import plugin.IPlugin;
 import projects.Project;
@@ -37,12 +47,18 @@ public class BatchWindow extends JFrame implements ActionListener{
 	private JScrollPane imagePane;
 	private JButton cancelButton;
 	private JButton createButton;
-	private JButton helpButton;
+	private JButton helpButton;    			//p.show(projectPane, e.getX(), e.getY());
+	private JButton selectAll;
+	private ProgressScroller progressPane;
 	
 	private Map<String, ImagePanel> imageList = new HashMap<String, ImagePanel>();
 	private Map<String, IPlugin> pluginList = new HashMap<String, IPlugin>();
+	private Map<ButtonModel, IPlugin> pluginMap = new HashMap<ButtonModel, IPlugin>();
+	private Map<JCheckBox, ImagePanel> buttonlist = new HashMap<JCheckBox,
+			ImagePanel>();
 	
 	private PrimaryPanel primary;
+	private ButtonGroup radioGroup = new ButtonGroup();
 	
 	private ArrayList<Project> projectList;
 	
@@ -66,6 +82,7 @@ public class BatchWindow extends JFrame implements ActionListener{
 		setNamePanel.add(nameLabel);
 		setNamePanel.add(nameField);
 		framePanel.add(setNamePanel);
+
 
 		framePanel.add(new Separator());
 		
@@ -94,12 +111,15 @@ public class BatchWindow extends JFrame implements ActionListener{
 		framePanel.add(new Separator());
 		
 		JPanel buttonPanel = new JPanel();
+		selectAll = new JButton("Select All");
+		selectAll.addActionListener(this);
 		createButton = new JButton("Create");
 		createButton.addActionListener(this);
 		cancelButton = new JButton("Cancel");
 		cancelButton.addActionListener(this);
 		helpButton = new JButton("HowTo");
 		helpButton.addActionListener(this);
+		buttonPanel.add(selectAll);
 		buttonPanel.add(createButton);
 		buttonPanel.add(cancelButton);
 		buttonPanel.add(helpButton);
@@ -113,12 +133,14 @@ public class BatchWindow extends JFrame implements ActionListener{
 	// TODO store everything
 	public void fillImagesBoxes(Project projectList)
 	{
+		buttonlist.clear();
 		chooseImages.removeAll();
 		for (ImagePanel image : projectList.getImageList())
 		{
 			JCheckBox imageBox = new JCheckBox(image.getName());
 			imageBox.addActionListener(this);
-			imageList.put(image.getName(), image);
+			//imageList.put(image.getName(), image);
+			buttonlist.put(imageBox, image);
 			chooseImages.add(imageBox);
 		}
 	}
@@ -127,30 +149,66 @@ public class BatchWindow extends JFrame implements ActionListener{
 	public void fillPluginsBoxes(ArrayList<IPlugin> pluginList)
 	{
 		chooseFilters.removeAll();
+		pluginMap.clear();
+
 		for (IPlugin plugin : pluginList)
 		{
 			JPanel boxpanel = new JPanel();
-			JCheckBox b = new JCheckBox(plugin.getName());
-			b.addActionListener(this);
-			b.setBackground(Color.WHITE);
+			JRadioButton b = new JRadioButton(plugin.getName());
 			JTextField textField = new JTextField();
 			textField.setPreferredSize(new Dimension(50, 20));
 			this.pluginList.put(plugin.getName(), plugin);
+			
+			pluginMap.put(b.getModel(), plugin);
 			boxpanel.add(new JLabel("exec order: "));
 			boxpanel.add(textField);
-			boxpanel.add(b);
-			boxpanel.setBackground(Color.WHITE);
-			chooseFilters.add(boxpanel);
+			radioGroup.add(b);
+			chooseFilters.add(b);
 		}
 	}
 	
 	public void setPrimary(PrimaryPanel p)
 	{
 		primary = p;
+		progressPane = primary.getProgressPane();
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		// Add with the names ! easy isn't it ?
+		String name = (String)(String)e.getActionCommand();
+		
+		if (name.equals("Create"))
+		{
+			Logger.debug("Creating new BATCH");
+			Set<JCheckBox> s = buttonlist.keySet();
+			IPlugin plugin = pluginMap.get(radioGroup.getSelection());
+			
+			progressPane.createBatchBar(s.size());
+			progressPane.showProgress();
+			primary.getTopPanel().add(progressPane.getBatchProgress());
+			for (JCheckBox b : s)
+			{
+				if(b.isSelected())
+				{
+					primary.getProjectPane().repaint();
+					primary.computeBatch(plugin, buttonlist.get(b));
+					primary.getProgressPane().repaintAll();
+				}
+			}
+			primary.getTopPanel().repaint();
+			this.setVisible(false);
+		}
+		else if (name.equals("Select All"))
+		{
+			Set<JCheckBox> s = buttonlist.keySet();
+			for (JCheckBox b : s)
+			{
+				b.setSelected(true);
+			}
+		}
+		else if (name.equals("Cancel"))
+		{
+			this.setVisible(false);
+		}
 	}
 }

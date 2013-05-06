@@ -1,9 +1,9 @@
 TODO		couty_a
 
-[-] Mandatory
-	[-] Projects
-		[-] Save
-		[-] Load
+[x] Mandatory
+	[x] Projects
+		[x] Save
+		[x] Load
 		[x] CreateNew
 		[x] CreateNew when opening image without projects
 		[x] Add Image
@@ -23,16 +23,22 @@ TODO		couty_a
 		[x] One hystory per image file
 		[x] Memento deign pattern
 		
-[x] Bonus Done
+[x] Bonus
 	[x] Multi project handling
-	[x] Multi History per project
 	[x] Multi files per project
 	[x] Hotkeys
+	[x] Multi History per project
+	[x] Multi Files Opening
+	[x] HistoryView & clickable
 	[x] Scrolling Area
 	[x] --debug option
-	
-[-] Ideas
+	[x] Preview on tabs
+	[x] default Look&Feel changed
+	[x] Visual Thread control
+	[x] Threaded Project Opening
+	[-] Multi Project Opening
 	[-] Batch processing
 	[-] Script creation
 	[-] Algorithm compare
-	[-] Filters algorithm
+	[-] Barrel Distorsion
+	[-] Different Blurs

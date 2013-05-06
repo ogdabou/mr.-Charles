@@ -19,6 +19,11 @@ import logger.Logger;
 import memento.CareTaker;
 import memento.Memento;
 
+/**
+ * This class is here to display the history of each image.
+ * @author ogda
+ *
+ */
 public class HystoryScroller extends JScrollPane implements MouseListener{
 	private Map<JLabel, Integer> stateList;
 	private Map<JLabel, CareTaker> takerList;
@@ -40,6 +45,10 @@ public class HystoryScroller extends JScrollPane implements MouseListener{
 		centerPanel = p;
 	}
 	
+	/**
+	 * The method redraw is called each time the currentImage careTaker changes
+	 * @param careTaker
+	 */
 	public void redraw(CareTaker careTaker)
 	{
 		Logger.debug("Redrawing History");
@@ -48,6 +57,8 @@ public class HystoryScroller extends JScrollPane implements MouseListener{
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.PAGE_AXIS));
 
 		int cpt = 0;
+		if(careTaker != null)
+		{
 		for (Memento memento : careTaker.getList())
 		{
 			memento.print();
@@ -68,6 +79,7 @@ public class HystoryScroller extends JScrollPane implements MouseListener{
 		}
 		this.getViewport().add(mainPanel);
 		this.repaint();
+		}
 	}
 
 
