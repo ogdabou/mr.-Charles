@@ -7,7 +7,7 @@ import java.awt.image.Kernel;
 import plugin.IPlugin;
 
 /**
- * Simple Edge Detector
+ * Simple Edge Detector.
  * @author ogda
  *
  */
