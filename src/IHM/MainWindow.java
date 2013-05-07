@@ -167,7 +167,7 @@ public class MainWindow extends JFrame implements ActionListener{
 			fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 			Logger.debug("File opening requested.");
 			FileFilter filter = new FileNameExtensionFilter("Image formats (*.jpg, *.jpeg, *.gif, *.ico, *.bmp)",
-					"jpeg", "gif", "ico", "bmp", "jpg");
+					"jpeg", "gif", "ico", "bmp", "png", "jpg");
 			fileChooser.setFileFilter(filter);
 			fileChooser.setName("Add file to the current project");
 			fileChooser.showOpenDialog(this);

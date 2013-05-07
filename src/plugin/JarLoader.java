@@ -63,16 +63,20 @@ public class JarLoader {
 					{
 						continue;
 					}
+					else
+					{
 					String className = jarEntry.getName().substring(0, jarEntry.getName().length() - 6 );
 					className = className.replaceAll("/", ".");
 					try {
 						Class result = classloader.loadClass(className);
+						Logger.debug("Plugin added :" + result.getName());
 						addFilter(result, className);
 						
 					} catch (ClassNotFoundException e1) {
 						Logger.error("ClassNotFoundException in JarLoader.java");
 					}
 					Logger.debug("loading class: " + className);
+					}
 				}
 			} catch (MalformedURLException e) {
 				Logger.error("MalformedExcpetion in JarLoader.java");
@@ -82,21 +86,25 @@ public class JarLoader {
 	
 	private void addFilter(Class result, String className)
 	{
-		if (className.contains("basic"))
-		{
-			try {
-				IPlugin newPlugin = (IPlugin)result.newInstance();
-				JMenuItem newFilterMenu = new JMenuItem(newPlugin.getName());
-				newFilterMenu.addActionListener(mainWindow);
-				mainWindow.addFilter(newPlugin);
-				if (className.contains("basic"))
-					mandatory.add(newFilterMenu);
-				else
-					bonus.add(newFilterMenu);
-			} catch (InstantiationException
-					| IllegalAccessException e1) {
-				e1.printStackTrace();
-			}
+		IPlugin newPlugin;
+		try {
+			newPlugin = (IPlugin)result.newInstance();
+			JMenuItem newFilterMenu = new JMenuItem(newPlugin.getName());
+			newFilterMenu.addActionListener(mainWindow);
+			mainWindow.addFilter(newPlugin);
+
+			if (className.contains("basic"))
+				mandatory.add(newFilterMenu);
+			else
+				bonus.add(newFilterMenu);
+
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+
 	}
 }

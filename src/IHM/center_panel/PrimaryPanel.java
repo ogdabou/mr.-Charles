@@ -152,7 +152,10 @@ public class PrimaryPanel extends JPanel implements ActionListener,
 			pane.remove(0);
 		}
 		// each onglet of the projectPane contains a JScrollPane
-		pane.add(file.getName(), added);
+		if(file.getName().length() > 15)
+			pane.add(file.getName().substring(0, 12) + "...", added);
+		else
+			pane.add(file.getName(), added);
 		pane.setSelectedIndex(pane.getTabCount() - 1);
 		historyScroller.redraw(addedProject.getMementoList().get(this.getCurrentImage()));
 	}
