@@ -12,7 +12,7 @@ import javax.swing.JScrollPane;
 
 import logger.Logger;
 import IHM.MainWindow;
-import IHM.center_panel.TopPanel;
+import IHM.TopPanel;
 import IHM.progress_bar.ProgressBarPanel;
 
 

@@ -1,8 +1,10 @@
 package IHM;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -15,11 +17,7 @@ import javax.swing.event.MenuListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import IHM.center_panel.FooterBar;
 import IHM.center_panel.PrimaryPanel;
-import IHM.center_panel.RightPanel;
-import IHM.center_panel.ToolBar;
-import IHM.center_panel.TopPanel;
 import IHM.progress_bar.ProgressScroller;
 
 import plugin.IPlugin;
@@ -29,6 +27,7 @@ import saver.ImageSaver;
 import saver.ProjectSaver;
 import subWindows.BatchWindow;
 import subWindows.NewProjectWindow;
+import subWindows.ScriptWindow;
 import sun.tools.jar.resources.jar;
 
 
@@ -49,9 +48,12 @@ public class MainWindow extends JFrame implements ActionListener{
 	private JMenuItem exit;
 	private JMenuItem saveProject;
 	private JMenuItem saveImage;
+	private JMenuItem script;
 	private JMenu filters;
 	private JMenu mandatory;
 	private JMenu bonus;
+	private JMenu scripts;
+	private JMenu batchAndScript;
 	private JMenuItem batch;
 	
 	private PrimaryPanel panel;
@@ -59,6 +61,7 @@ public class MainWindow extends JFrame implements ActionListener{
 	private RightPanel right;
 	private ToolBar toolBar;
 	private NewProjectWindow projectWindow;
+	private ScriptWindow scrWindow;
 	private BatchWindow batchWindow;
 	private JarLoader jarLoader;
 	private ProgressScroller progressPane;
@@ -79,11 +82,13 @@ public class MainWindow extends JFrame implements ActionListener{
 		} catch (UnsupportedLookAndFeelException e) {
 			e.printStackTrace();
 		}
+		scrWindow = new ScriptWindow(this);
 		topPanel = new TopPanel();
 		batchWindow = new BatchWindow();
 		plugins = new ArrayList<IPlugin>();
 		this.setTitle("myPhotoshop - couty_a");
-		this.setMinimumSize(new Dimension(1024, 700));
+		this.setExtendedState(Frame.MAXIMIZED_BOTH);
+		//this.setMinimumSize(new Dimension(1024, 700));
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		projectWindow = new NewProjectWindow(this);
 		projectWindow.setLayout(new BorderLayout());
@@ -177,7 +182,9 @@ public class MainWindow extends JFrame implements ActionListener{
 			{
 				if (choosen.isDirectory())
 				{
-					for (File file : choosen.listFiles())
+					MultipleFileOpener fileOpener = new MultipleFileOpener(choosen, panel);
+					fileOpener.execute();
+					/*for (File file : choosen.listFiles())
 					{
 						if (file != null)
 						{
@@ -185,11 +192,10 @@ public class MainWindow extends JFrame implements ActionListener{
 							if (panel.getListSize() != 0)
 								panel.getCurrentProject().setDirectory(file.getPath());
 						}
-					}
+					}*/
 				}
 				else
 				{
-					
 					panel.addImage(choosen);
 					if (panel.getListSize() != 0)
 						panel.getCurrentProject().setDirectory(choosen.getPath());
@@ -231,6 +237,10 @@ public class MainWindow extends JFrame implements ActionListener{
 		else if (name.equals("Save project"))
 		{
 			ProjectSaver.saveProject(panel.getCurrentProject(), this);
+		}
+		else if (name.equals("new Script"))
+		{
+			scrWindow.setPluginList(plugins);
 		}
 		else
 		{
@@ -283,6 +293,16 @@ public class MainWindow extends JFrame implements ActionListener{
 		return panel;
 	}
 	
+	public JMenu getScriptMenu()
+	{
+		return scripts;
+	}
+	
+	public void addPlugin(IPlugin p)
+	{
+		plugins.add(p);
+	}
+
 	/**
 	 * Main window MenuBar initialization
 	 * @return
@@ -327,15 +347,49 @@ public class MainWindow extends JFrame implements ActionListener{
 		mandatory = new JMenu("Mandatories");
 		batch = new JMenuItem("Batch");
 		batch.addActionListener(this);
+		script = new JMenuItem("new Script");
+		script.addActionListener(this);
 		bonus = new JMenu("Bonus");
+		scripts = new JMenu("Scripts");
 		filters.add(mandatory);
 		filters.add(bonus);
+		filters.add(scripts);
 		filters.addSeparator();
-		filters.add(batch);
+		batchAndScript = new JMenu("Batch & Scripts");
+		batchAndScript.add(batch);
+		batchAndScript.add(script);
 		
 		menuBar.add(file);
 		menuBar.add(filters);
+		menuBar.add(batchAndScript);
 		
 		return menuBar;
 	}
+}
+
+class MultipleFileOpener extends SwingWorker
+{
+	private File choosen;
+	private PrimaryPanel panel;
+	
+	public MultipleFileOpener(File file, PrimaryPanel panel)
+	{
+		this.choosen = file;
+		this.panel = panel;
+	}
+	
+	@Override
+	protected Object doInBackground() throws Exception {
+		for (File file : choosen.listFiles())
+		{
+			if (file != null)
+			{
+				panel.addImage(file);
+				if (panel.getListSize() != 0)
+					panel.getCurrentProject().setDirectory(file.getPath());
+			}
+		}
+		return null;
+	}
+	
 }

@@ -31,6 +31,9 @@ import javax.swing.Timer;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import IHM.FooterBar;
+import IHM.HystoryScroller;
+import IHM.TopPanel;
 import IHM.progress_bar.ProgressScroller;
 
 import com.sun.org.apache.bcel.internal.generic.LASTORE;
@@ -514,7 +517,10 @@ class BatchThread extends SwingWorker
 			image.setImage(result);
 			Logger.debug("addMemento for :" + image.getName());
 			parent.getProgressPane().updateProgress(image.getName() + "ended");
-			currentP.getCareTaker(image).addToMemento("Filter: " + filter.getName());
+			if(!currentP.getCareTaker(image).addToMemento("Filter: " + filter.getName()))
+			{
+				currentP.getCareTaker(image).originator.setCurrentState(image);
+			}
 		}
 		else
 		{
@@ -568,7 +574,10 @@ class FilterThread extends SwingWorker
 			image.setImage(result);
 			Logger.debug("addMemento for :" + image.getName());
 			ImagePanel resultImage = new ImagePanel(result, image.getName());
-			currentP.getCareTaker(image).addToMemento("Filter: " + filter.getName());
+			if(!currentP.getCareTaker(image).addToMemento("Filter: " + filter.getName()))
+			{
+				currentP.getCareTaker(image).originator.setCurrentState(image);
+			}
 		}
 		else
 		{
