@@ -23,7 +23,7 @@ import com.sun.org.apache.bcel.internal.generic.JsrInstruction;
 import logger.Logger;
 import memento.CareTaker;
 
-import IHM.center_panel.HystoryScroller;
+import IHM.HystoryScroller;
 
 public class Project implements Serializable
 {

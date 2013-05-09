@@ -43,6 +43,7 @@ public class NewProjectWindow extends JFrame{
 		pan.add(okButton);
 		this.add(pan);
 		this.pack();
+		this.setLocationRelativeTo(null);
 	}
 	
 	public String getProjectName()

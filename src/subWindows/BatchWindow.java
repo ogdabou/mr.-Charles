@@ -73,6 +73,7 @@ public class BatchWindow extends JFrame implements ActionListener{
 		this.setPreferredSize(new Dimension(400, 600));
 		this.setMaximumSize(new Dimension(400, 600));
 		this.setResizable(false);
+		this.setLocationRelativeTo(null);
 		framePanel.setLayout(new BoxLayout(framePanel, BoxLayout.PAGE_AXIS));
 		
 		setNamePanel = new JPanel();

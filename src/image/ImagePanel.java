@@ -1,8 +1,8 @@
 package image;
 
-import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
+import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.WritableRaster;
@@ -159,11 +159,17 @@ public class ImagePanel extends JPanel implements Serializable
 		this.image = image;
 	}
 
+	/**
+	 * This method is used to display the image.
+	 */
 	@Override
 	public void paintComponent(Graphics g)
 	{
 		super.paintComponent(g);
+		Point p = new Point(5, 5);
 		g.drawImage(image, 0, 0, null);
+		//g.drawLine(0, 0, 100, 100);
+		g.dispose();
 	}
 
 	public String getFileName()

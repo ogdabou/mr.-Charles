@@ -22,14 +22,18 @@ public class Memento implements Serializable{
 	/**
 	 * 
 	 */
+	public static int ID;
 	private static final long serialVersionUID = 1L;
 	private ImagePanel savedImage;
 	private String message;
 	boolean valid = true;
+	private int id = 0;
 	
 	public Memento(String msg, ImagePanel toSave) {
 		message = msg;
 		savedImage = toSave.getCopy();
+		Memento.ID = Memento.ID + 1;
+		id = Memento.ID;
 	}
 	
 	public boolean isValid()

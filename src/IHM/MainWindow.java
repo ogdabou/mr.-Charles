@@ -16,6 +16,7 @@ import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.text.LayeredHighlighter;
 
 import IHM.center_panel.PrimaryPanel;
 import IHM.progress_bar.ProgressScroller;
@@ -66,6 +67,7 @@ public class MainWindow extends JFrame implements ActionListener{
 	private JarLoader jarLoader;
 	private ProgressScroller progressPane;
 	private TopPanel topPanel;
+	private FlyingToolBar flyingToolBar;
 	/**
 	 * Constructor
 	 */
@@ -82,9 +84,13 @@ public class MainWindow extends JFrame implements ActionListener{
 		} catch (UnsupportedLookAndFeelException e) {
 			e.printStackTrace();
 		}
+
+		JLayeredPane lol = new JLayeredPane();
+		
 		scrWindow = new ScriptWindow(this);
 		topPanel = new TopPanel();
 		batchWindow = new BatchWindow();
+		flyingToolBar = new FlyingToolBar();
 		plugins = new ArrayList<IPlugin>();
 		this.setTitle("myPhotoshop - couty_a");
 		this.setExtendedState(Frame.MAXIMIZED_BOTH);
@@ -124,6 +130,7 @@ public class MainWindow extends JFrame implements ActionListener{
 		jarLoader = new JarLoader(bonus, mandatory, this);
 		jarLoader.load();
 		batchWindow.setPrimary(panel);
+		//this.add(flyingToolBar);
 		this.setResizable(false);
 		this.setVisible(true);
 	}
