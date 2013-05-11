@@ -116,9 +116,7 @@ public class HystoryScroller extends JScrollPane implements MouseListener{
 
 	@Override
 	public void mouseExited(MouseEvent e) {
-		JPanel l = (JPanel)e.getComponent();
-		//this.revalidate();
-		
+		JPanel l = (JPanel)e.getComponent();		
 	}
 
 

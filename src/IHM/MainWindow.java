@@ -68,6 +68,7 @@ public class MainWindow extends JFrame implements ActionListener{
 	private ProgressScroller progressPane;
 	private TopPanel topPanel;
 	private FlyingToolBar flyingToolBar;
+	private JLayeredPane mainPanel;
 	/**
 	 * Constructor
 	 */
@@ -85,8 +86,6 @@ public class MainWindow extends JFrame implements ActionListener{
 			e.printStackTrace();
 		}
 
-		JLayeredPane lol = new JLayeredPane();
-		
 		scrWindow = new ScriptWindow(this);
 		topPanel = new TopPanel();
 		batchWindow = new BatchWindow();
@@ -162,9 +161,9 @@ public class MainWindow extends JFrame implements ActionListener{
 			if (projectFile != null)
 			{
 				topPanel.add(panel.getProgressPane().createProjectLoaderBar());
-				topPanel.revalidate();
+				topPanel.repaint();
 				topPanel.setVisible(true);
-				this.revalidate();
+				this.repaint();
 				ProjectSaver.openProject(this, projectFile,
 						panel.getProgressPane().getProjectBar());
 				/*Project newProject = ProjectSaver.openProject(projectFile);

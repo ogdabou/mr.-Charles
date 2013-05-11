@@ -223,7 +223,7 @@ public class ScriptWindow extends JFrame implements DragSourceListener, DragGest
 			}
 			choosentJList.setModel(model);
 			choosentJList.setPreferredSize(new Dimension(200, pluginNames.length * 28));
-			this.revalidate();
+			this.repaint();
 		}
 	}
 

@@ -1,5 +1,8 @@
 package entryPoint;
 
+import javax.swing.JLayeredPane;
+
+import IHM.FlyingToolBar;
 import IHM.MainWindow;
 
 public class Main
