@@ -26,12 +26,11 @@ public class GreyScale implements IPlugin{
 		Graphics2D painter2D = (Graphics2D)painter;
 		painter2D.drawImage(result, null, 0, 0);
 		
-	    /*BufferedImage convertedImg = new BufferedImage(result.getWidth(), 
+	    BufferedImage convertedImg = new BufferedImage(result.getWidth(), 
 	    		result.getHeight(), BufferedImage.TYPE_INT_RGB);
 	    convertedImg.getGraphics().drawImage(result, 0, 0, null);
 		
-		return convertedImg;*/
-		return result;
+		return convertedImg;
 	}
 
 	@Override

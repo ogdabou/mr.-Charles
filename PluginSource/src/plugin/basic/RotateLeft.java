@@ -18,10 +18,10 @@ public class RotateLeft implements IPlugin{
 		
 		Graphics2D printer = (Graphics2D)result.getGraphics();
 		
-		printer.rotate(Math.toRadians(90), result.getWidth() / 2,
+		printer.rotate(Math.toRadians(-90), result.getWidth() / 2,
 				result.getHeight() / 2);
 		printer.translate(((result.getWidth()-img.getWidth()) /2),
-				((result.getHeight()-img.getHeight()) /2));
+				((result.getHeight() - img.getHeight()) /2));
 		printer.drawImage(img, 0, 0, img.getWidth(), img.getHeight(), null);
 		
 		return result;

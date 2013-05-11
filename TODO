@@ -24,21 +24,17 @@ TODO		couty_a
 		[x] Memento deign pattern
 		
 [x] Bonus
-	[x] Multi project handling
-	[x] Multi files per project
-	[x] Hotkeys
+	[x] Multi Projects + MultiFiles/Project
 	[x] Multi History per project
-	[x] Multi Files Opening
+	[x] Threaded project Opening(multi files)
 	[x] HistoryView & clickable
-	[x] Scrolling Area
-	[x] --debug option
+	[x] All threads progress/run are visible
+	[x] Batch processing
+	[x] Edge Detection
+	[x] Simple blur
+	[x] Simple Emboss
 	[x] Preview on tabs
-	[x] default Look&Feel changed
-	[x] Visual Thread control
-	[x] Threaded Project Opening
-	[-] Multi Project Opening
-	[-] Batch processing
+	[x] Hotkeys
+	[x] --debug option
+	[x] TODO ?
 	[-] Script creation
-	[-] Algorithm compare
-	[-] Barrel Distorsion
-	[-] Different Blurs
